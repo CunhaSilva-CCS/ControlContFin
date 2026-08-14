@@ -25,8 +25,40 @@ App de controle financeiro pessoal completo para iOS e Android, feito com Expo (
 - react-native-gifted-charts (gráficos)
 - expo-file-system + expo-sharing + expo-document-picker (exportação e backup)
 - expo-secure-store + expo-crypto + expo-local-authentication (PIN e biometria)
+- SQLCipher (via plugin nativo do expo-sqlite) + aes-js (criptografia em repouso)
 
 ## Segurança
+
+### Criptografia dos dados em repouso
+
+O banco de dados SQLite inteiro é criptografado com **SQLCipher** (AES-256), não apenas
+protegido por senha na tela — ou seja, o arquivo `.db` no armazenamento do aparelho fica
+ilegível mesmo se for extraído diretamente (backup de terceiros, aparelho com root/jailbreak,
+etc.), sem passar pelo app.
+
+- **Chave**: gerada aleatoriamente (256 bits) na primeira execução e guardada no
+  `expo-secure-store` (Keychain/Keystore do sistema), marcada como vinculada a este aparelho
+  (`WHEN_UNLOCKED_THIS_DEVICE_ONLY`) — não é incluída em backups na nuvem do iCloud/Google, e não
+  depende do PIN do app (perder/resetar o PIN não afeta a chave nem os dados).
+- **Onde é aplicada**: `src/db/encryptionKey.ts` gera/recupera a chave; `src/db/client.ts` aplica
+  `PRAGMA key` na conexão antes de qualquer outra operação no banco.
+- **Backups automáticos**: os arquivos de backup diário local (`src/services/backupService.ts`)
+  também são criptografados (AES-256-CTR, `src/services/backupEncryption.ts`) com a mesma chave.
+- **Backup manual exportado**: o arquivo gerado por "Fazer backup agora e compartilhar" **não é
+  criptografado** — ele foi pensado para ser portável/restaurável em qualquer aparelho, então
+  criptografá-lo exigiria uma senha própria de exportação (fora do escopo atual). Trate esse
+  arquivo como um documento sensível.
+
+> ⚠️ **Requer rebuild nativo**: `useSQLCipher` é uma flag de build (compilada no binário nativo),
+> não algo que funciona no Expo Go — a partir desta mudança, **o app inteiro** (não só
+> notificações/biometria) só roda em um Dev Client ou build gerado via `npx expo run:ios` /
+> `npx expo run:android` / EAS Build. Não foi possível validar em um dispositivo real neste
+> ambiente (sem simulador/aparelho) — depois de gerar um build, é possível confirmar que a
+> criptografia está realmente ativa extraindo o arquivo `.db` do aparelho (ex.: `adb pull` no
+> Android) e verificando que ele **não** começa com o cabeçalho padrão `SQLite format 3` em texto
+> puro — se aparecer esse cabeçalho, o build não compilou com SQLCipher.
+
+### Bloqueio do app
 
 O app é protegido por um PIN numérico de 6 dígitos, obrigatório desde o primeiro uso:
 
@@ -53,12 +85,19 @@ npm install
 npm start
 ```
 
-Abra no Expo Go (iOS/Android) escaneando o QR code exibido pelo comando acima.
-
-> A partir das funcionalidades de notificações e tarefas em segundo plano, o Expo Go tem suporte
-> limitado — para testar essas partes é necessário criar um Dev Client
-> (`npx expo install expo-dev-client` já está no projeto; rode `npx expo run:ios` ou
-> `npx expo run:android`, ou gere um build de desenvolvimento com `eas build --profile development`).
+> ⚠️ **O Expo Go não funciona mais para este projeto.** Como o banco de dados agora usa SQLCipher
+> (uma flag de build nativa, ver [Segurança](#segurança)), é obrigatório usar um Dev Client:
+> ```bash
+> npx expo run:android   # precisa do Android Studio
+> npx expo run:ios       # precisa de macOS + Xcode
+> ```
+> Sem Android Studio/Xcode instalados, gere um build de desenvolvimento pela nuvem:
+> ```bash
+> npm install -g eas-cli
+> eas login
+> eas build --profile development --platform android   # ou ios
+> ```
+> Depois de instalar esse build no aparelho, `npm start` conecta nele normalmente.
 
 ## Scripts
 

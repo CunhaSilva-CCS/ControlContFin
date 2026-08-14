@@ -8,6 +8,7 @@
     "@react-navigation/bottom-tabs": "^7.18.16",
     "@react-navigation/native": "^7.3.16",
     "@react-navigation/native-stack": "^7.18.8",
+    "aes-js": "^3.1.2",
     "drizzle-orm": "^0.44.7",
     "expo": "~57.0.12",
     "expo-background-task": "~57.0.9",
@@ -32,6 +33,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@types/aes-js": "^3.1.4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jest": "^29.5.14",
     "@types/react": "~19.2.2",

@@ -27,6 +27,12 @@
       "expo-background-task",
       "expo-dev-client",
       [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      [
         "expo-local-authentication",
         {
           "faceIDPermission": "Permitir que o ControlContFin use o Face ID para desbloquear o app."
