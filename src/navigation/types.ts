@@ -18,6 +18,9 @@ export type TransactionsStackParamList = {
 
 export type BudgetsGoalsStackParamList = {
   BudgetsGoalsHome: undefined;
+  BudgetForm: { categoryId: number | null } | undefined;
+  GoalForm: { goalId?: number } | undefined;
+  GoalContribute: { goalId: number };
 };
 
 export type ReportsStackParamList = {
