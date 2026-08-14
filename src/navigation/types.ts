@@ -31,4 +31,6 @@ export type SettingsStackParamList = {
   SettingsHome: undefined;
   AccountsList: undefined;
   AccountForm: { accountId?: number } | undefined;
+  RecurringRulesList: undefined;
+  RecurringRuleForm: { ruleId?: number } | undefined;
 };

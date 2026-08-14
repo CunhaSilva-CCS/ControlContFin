@@ -15,6 +15,12 @@ export function SettingsScreen({ navigation }: Props) {
         left={(props) => <List.Icon {...props} icon="bank" />}
         onPress={() => navigation.navigate('AccountsList')}
       />
+      <List.Item
+        title="Transações recorrentes"
+        description="Contas fixas e assinaturas com lembretes automáticos"
+        left={(props) => <List.Icon {...props} icon="sync" />}
+        onPress={() => navigation.navigate('RecurringRulesList')}
+      />
     </List.Section>
   );
 }

@@ -9,7 +9,10 @@ import { colors, paperTheme, spacing } from '@/constants/theme';
 import { db } from '@/db/client';
 import { useDatabaseMigrations } from '@/db/migrationsHook';
 import { seedDefaultCategories } from '@/db/repositories/categories';
+import { useRecurringGeneration } from '@/hooks/useRecurringGeneration';
 import { RootNavigator } from '@/navigation/RootNavigator';
+import { registerRecurringBackgroundTask } from '@/services/backgroundTask';
+import { ensureNotificationSetup } from '@/services/notifications';
 
 export default function App() {
   const { success, error } = useDatabaseMigrations();
@@ -20,7 +23,11 @@ export default function App() {
       return;
     }
     seedDefaultCategories(db, defaultCategories).then(() => setSeeded(true));
+    ensureNotificationSetup();
+    registerRecurringBackgroundTask();
   }, [success]);
+
+  useRecurringGeneration(seeded);
 
   if (error) {
     return (
