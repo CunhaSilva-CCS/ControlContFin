@@ -13,6 +13,8 @@ export function useAutomaticBackup(enabled: boolean) {
     if (!enabled) {
       return;
     }
-    runAutomaticBackupIfDue(db, todayISODate());
+    runAutomaticBackupIfDue(db, todayISODate()).catch((err: unknown) =>
+      console.error('Falha ao criar backup automático', err),
+    );
   }, [enabled]);
 }

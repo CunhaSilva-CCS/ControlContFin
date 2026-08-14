@@ -1,12 +1,12 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { Button, SegmentedButtons, TextInput } from 'react-native-paper';
+import { Button, SegmentedButtons, Text, TextInput } from 'react-native-paper';
 
 import { AmountInput } from '@/components/common/AmountInput';
 import { ColorSwatchPicker } from '@/components/common/ColorSwatchPicker';
 import { accountColorPalette, accountIconByType, accountTypeLabels } from '@/constants/accountPresets';
-import { spacing } from '@/constants/theme';
+import { colors, spacing } from '@/constants/theme';
 import { db } from '@/db/client';
 import { createAccount, getAccount, updateAccount } from '@/db/repositories/accounts';
 import { accountTypeValues, type AccountType } from '@/db/schema';
@@ -22,19 +22,22 @@ export function AccountFormScreen({ route, navigation }: Props) {
   const [type, setType] = useState<AccountType>('checking');
   const [initialBalanceCents, setInitialBalanceCents] = useState(0);
   const [color, setColor] = useState(accountColorPalette[0]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isEditing || !accountId) {
       return;
     }
-    getAccount(db, accountId).then((existing) => {
-      if (existing) {
-        setName(existing.name);
-        setType(existing.type);
-        setInitialBalanceCents(existing.initialBalanceCents);
-        setColor(existing.color);
-      }
-    });
+    getAccount(db, accountId)
+      .then((existing) => {
+        if (existing) {
+          setName(existing.name);
+          setType(existing.type);
+          setInitialBalanceCents(existing.initialBalanceCents);
+          setColor(existing.color);
+        }
+      })
+      .catch(() => setLoadError('Não foi possível carregar esta conta.'));
   }, [isEditing, accountId]);
 
   const canSave = name.trim().length > 0;
@@ -60,6 +63,11 @@ export function AccountFormScreen({ route, navigation }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {loadError && (
+        <Text variant="bodyMedium" style={styles.error}>
+          {loadError}
+        </Text>
+      )}
       <TextInput label="Nome da conta" mode="outlined" value={name} onChangeText={setName} />
 
       <SegmentedButtons
@@ -93,5 +101,8 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: spacing.md,
+  },
+  error: {
+    color: colors.expense,
   },
 });

@@ -1,11 +1,11 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { Button, Chip } from 'react-native-paper';
+import { Button, Chip, Text } from 'react-native-paper';
 
 import { AmountInput } from '@/components/common/AmountInput';
 import { CategoryPicker } from '@/components/transactions/CategoryPicker';
-import { spacing } from '@/constants/theme';
+import { colors, spacing } from '@/constants/theme';
 import { db } from '@/db/client';
 import { listBudgets, upsertBudget } from '@/db/repositories/budgets';
 import { useCategories } from '@/hooks/useCategories';
@@ -21,15 +21,18 @@ export function BudgetFormScreen({ route, navigation }: Props) {
   const [isOverall, setIsOverall] = useState(initialCategoryId === null);
   const [categoryId, setCategoryId] = useState<number | null>(initialCategoryId);
   const [limitCents, setLimitCents] = useState(0);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { categories } = useCategories('expense');
 
   useEffect(() => {
-    listBudgets(db, month).then((budgets) => {
-      const existing = budgets.find((budget) => budget.categoryId === initialCategoryId);
-      if (existing) {
-        setLimitCents(existing.limitCents);
-      }
-    });
+    listBudgets(db, month)
+      .then((budgets) => {
+        const existing = budgets.find((budget) => budget.categoryId === initialCategoryId);
+        if (existing) {
+          setLimitCents(existing.limitCents);
+        }
+      })
+      .catch(() => setLoadError('Não foi possível carregar o orçamento atual.'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -49,6 +52,11 @@ export function BudgetFormScreen({ route, navigation }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {loadError && (
+        <Text variant="bodyMedium" style={styles.error}>
+          {loadError}
+        </Text>
+      )}
       <Chip
         selected={isOverall}
         onPress={() => {
@@ -84,5 +92,8 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: spacing.md,
+  },
+  error: {
+    color: colors.expense,
   },
 });

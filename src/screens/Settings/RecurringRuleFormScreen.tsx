@@ -1,14 +1,14 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { Button, SegmentedButtons, TextInput } from 'react-native-paper';
+import { Button, SegmentedButtons, Text, TextInput } from 'react-native-paper';
 
 import { AccountPicker } from '@/components/transactions/AccountPicker';
 import { AmountInput } from '@/components/common/AmountInput';
 import { CategoryPicker } from '@/components/transactions/CategoryPicker';
 import { DateField } from '@/components/common/DateField';
 import { frequencyLabels } from '@/constants/recurringFrequency';
-import { spacing } from '@/constants/theme';
+import { colors, spacing } from '@/constants/theme';
 import { db } from '@/db/client';
 import {
   createRecurringRule,
@@ -40,6 +40,7 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
   const [notifyBeforeDays, setNotifyBeforeDays] = useState('1');
   const [active, setActive] = useState(true);
   const [existingNotificationId, setExistingNotificationId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const { accounts } = useAccounts();
   const { categories } = useCategories(type);
@@ -54,22 +55,24 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
     if (!isEditing || !ruleId) {
       return;
     }
-    getRecurringRule(db, ruleId).then((existing) => {
-      if (!existing) {
-        return;
-      }
-      setType(existing.type === 'income' ? 'income' : 'expense');
-      setAccountId(existing.accountId);
-      setCategoryId(existing.categoryId);
-      setAmountCents(existing.amountCents);
-      setDescription(existing.description ?? '');
-      setFrequency(existing.frequency);
-      setInterval(String(existing.interval));
-      setStartDate(existing.startDate);
-      setNotifyBeforeDays(String(existing.notifyBeforeDays));
-      setActive(existing.active);
-      setExistingNotificationId(existing.notificationId);
-    });
+    getRecurringRule(db, ruleId)
+      .then((existing) => {
+        if (!existing) {
+          return;
+        }
+        setType(existing.type === 'income' ? 'income' : 'expense');
+        setAccountId(existing.accountId);
+        setCategoryId(existing.categoryId);
+        setAmountCents(existing.amountCents);
+        setDescription(existing.description ?? '');
+        setFrequency(existing.frequency);
+        setInterval(String(existing.interval));
+        setStartDate(existing.startDate);
+        setNotifyBeforeDays(String(existing.notifyBeforeDays));
+        setActive(existing.active);
+        setExistingNotificationId(existing.notificationId);
+      })
+      .catch(() => setLoadError('Não foi possível carregar esta recorrência.'));
   }, [isEditing, ruleId]);
 
   const parsedInterval = Math.max(1, Number.parseInt(interval, 10) || 1);
@@ -123,6 +126,11 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {loadError && (
+        <Text variant="bodyMedium" style={styles.error}>
+          {loadError}
+        </Text>
+      )}
       <SegmentedButtons
         value={type}
         onValueChange={(value) => setType(value as 'income' | 'expense')}
@@ -199,5 +207,8 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: spacing.md,
+  },
+  error: {
+    color: colors.expense,
   },
 });

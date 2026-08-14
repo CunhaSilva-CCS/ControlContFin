@@ -29,3 +29,13 @@ export function getOrCreateDatabaseKey(): string {
   });
   return key;
 }
+
+/**
+ * Discards the current key so the next `getOrCreateDatabaseKey()` call
+ * generates a fresh one. Used by the database-open-failure recovery flow —
+ * only safe to call once the undecryptable `.db` file has also been deleted,
+ * since the old key is what made that file readable in the first place.
+ */
+export async function clearDatabaseKey(): Promise<void> {
+  await SecureStore.deleteItemAsync(DB_KEY_STORAGE_KEY);
+}

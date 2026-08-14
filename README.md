@@ -117,6 +117,55 @@ Quando for gerar uma build de verdade para a loja, use o perfil `production`
 para **não** incluir o `expo-dev-client` (menu de desenvolvedor/carregamento remoto de bundle)
 — ver [Segurança](#segurança).
 
+## Checklist de publicação nas lojas
+
+O que já está pronto em código, e o que ainda depende de ação externa (contas, arte, textos)
+antes de submeter de verdade à App Store / Play Store.
+
+### ✅ Já resolvido em código
+
+- Tratamento de erro em todas as leituras assíncronas do banco (hooks em `src/hooks/*.ts` e
+  telas de formulário/detalhe) — uma falha mostra uma mensagem em vez de deixar a tela presa
+  num spinner infinito.
+- `ErrorBoundary` global (`src/components/common/ErrorBoundary.tsx`) — uma exceção de render em
+  qualquer tela não derruba mais o app inteiro para uma tela branca.
+- Recuperação de falha ao abrir o banco criptografado (`src/db/client.ts`): se a chave do
+  SQLCipher não bater com o arquivo `.db` (ex.: aparelho restaurado de um backup do sistema),
+  o app mostra uma tela de recuperação com a opção "Recomeçar do zero" em vez de travar no
+  carregamento.
+- Chamadas "fire-and-forget" (seed inicial, notificações, tarefa em segundo plano, geração de
+  recorrências, backup automático) agora tratam erro e registram no console em vez de falhar
+  silenciosamente sem deixar rastro.
+- `ios.bundleIdentifier` / `android.package` configurados em `app.json` (necessário para
+  qualquer build de loja) — **valor inicial `com.cunhasilva.controlcontfin`, veja o aviso
+  abaixo**.
+- Splash screen configurada via plugin `expo-splash-screen`, usando o asset
+  `assets/splash-icon.png` que já existia no projeto.
+- `eas.json` com perfis `development`/`preview`/`production`, e `production` já excluindo o
+  `expo-dev-client` do binário final (ver [Segurança](#segurança)).
+- CI (`.github/workflows/ci.yml`) rodando typecheck, lint e testes em todo push/PR.
+
+> ⚠️ **Sobre o `bundleIdentifier`/`package`**: o valor usado (`com.cunhasilva.controlcontfin`) é
+> um placeholder razoável, mas **confirme ou troque antes da primeira submissão** — depois que um
+> app é publicado numa loja com um identificador, trocá-lo depois exige efetivamente publicar
+> como um app novo (perdendo avaliações, histórico de instalação, etc.).
+
+### ⏳ Depende de ação externa (fora do escopo de código)
+
+- **Conta de desenvolvedor**: Apple Developer Program (assinatura anual) para iOS, e Google Play
+  Console (taxa única) para Android — necessárias para gerar as credenciais que preenchem
+  `eas.json`'s `submit.production` e para efetivamente enviar o build às lojas.
+- **Arte final do ícone e splash**: `assets/icon.png` hoje é o ícone genérico padrão do template
+  do Expo (não é uma marca própria) — precisa ser substituído por artwork real antes de submeter.
+  O mesmo vale para revisar se `assets/splash-icon.png` reflete a identidade visual desejada.
+- **Política de privacidade**: uma página hospedada publicamente com o texto da política — ambas
+  as lojas exigem esse link na ficha do app, mesmo sendo um app 100% local, por causa do uso de
+  biometria e notificações.
+- **Teste em dispositivo/simulador real**: nada neste projeto foi validado num aparelho de
+  verdade neste ambiente de desenvolvimento (sem simulador/dispositivo físico disponível aqui) —
+  veja as instruções em [Rodando o projeto](#rodando-o-projeto) para gerar um Dev Client e testar
+  antes de submeter.
+
 ## Scripts
 
 - `npm run lint` — ESLint

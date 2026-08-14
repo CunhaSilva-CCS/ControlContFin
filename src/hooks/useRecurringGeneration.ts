@@ -17,11 +17,15 @@ export function useRecurringGeneration(enabled: boolean) {
       return;
     }
 
-    runRecurringGeneration(todayISODate());
+    runRecurringGeneration(todayISODate()).catch((err: unknown) =>
+      console.error('Falha ao gerar transações recorrentes', err),
+    );
 
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (appState.current.match(/inactive|background/) && nextState === 'active') {
-        runRecurringGeneration(todayISODate());
+        runRecurringGeneration(todayISODate()).catch((err: unknown) =>
+          console.error('Falha ao gerar transações recorrentes', err),
+        );
       }
       appState.current = nextState;
     });

@@ -1,54 +1,35 @@
-import { useEffect, useState } from 'react';
-
 import { db } from '@/db/client';
 import { getAccountBalanceCents, listAccounts } from '@/db/repositories/accounts';
 import { useDataStore } from '@/store/dataStore';
 
+import { useAsyncQuery } from './useAsyncQuery';
+
 export function useAccountBalance(accountId: number) {
   const accountsVersion = useDataStore((state) => state.version.accounts);
   const transactionsVersion = useDataStore((state) => state.version.transactions);
-  const [balanceCents, setBalanceCents] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data, loading, error } = useAsyncQuery(
+    () => getAccountBalanceCents(db, accountId),
+    [accountId, accountsVersion, transactionsVersion],
+    0,
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    getAccountBalanceCents(db, accountId).then((cents) => {
-      if (!cancelled) {
-        setBalanceCents(cents);
-        setLoading(false);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [accountId, accountsVersion, transactionsVersion]);
-
-  return { balanceCents, loading };
+  return { balanceCents: data, loading, error };
 }
 
 export function useTotalBalance() {
   const accountsVersion = useDataStore((state) => state.version.accounts);
   const transactionsVersion = useDataStore((state) => state.version.transactions);
-  const [totalCents, setTotalCents] = useState(0);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    listAccounts(db).then(async (accountsList) => {
+  const { data, loading, error } = useAsyncQuery(
+    async () => {
+      const accountsList = await listAccounts(db);
       const balances = await Promise.all(
         accountsList.map((account) => getAccountBalanceCents(db, account.id)),
       );
-      if (!cancelled) {
-        setTotalCents(balances.reduce((sum, cents) => sum + cents, 0));
-        setLoading(false);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [accountsVersion, transactionsVersion]);
+      return balances.reduce((sum, cents) => sum + cents, 0);
+    },
+    [accountsVersion, transactionsVersion],
+    0,
+  );
 
-  return { totalCents, loading };
+  return { totalCents: data, loading, error };
 }

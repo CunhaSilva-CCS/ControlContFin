@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { List, SegmentedButtons, Switch, Text } from 'react-native-paper';
 
-import { spacing } from '@/constants/theme';
+import { colors, spacing } from '@/constants/theme';
 import type { SettingsStackParamList } from '@/navigation/types';
 import { getAuthSettings, setAutoLockMinutes, setBiometricEnabled } from '@/services/auth/authService';
 import { isBiometricAvailable } from '@/services/auth/biometricAuth';
@@ -23,14 +23,19 @@ export function SecuritySettingsScreen({ navigation }: Props) {
   const autoLockMinutes = useAuthStore((state) => state.autoLockMinutes);
   const setSettings = useAuthStore((state) => state.setSettings);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    isBiometricAvailable().then(setBiometricAvailable);
-    getAuthSettings().then((settings) => {
-      if (settings) {
-        setSettings(settings);
-      }
-    });
+    isBiometricAvailable()
+      .then(setBiometricAvailable)
+      .catch(() => setBiometricAvailable(false));
+    getAuthSettings()
+      .then((settings) => {
+        if (settings) {
+          setSettings(settings);
+        }
+      })
+      .catch(() => setLoadError('Não foi possível carregar as configurações de segurança.'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -47,6 +52,11 @@ export function SecuritySettingsScreen({ navigation }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {loadError && (
+        <Text variant="bodyMedium" style={styles.error}>
+          {loadError}
+        </Text>
+      )}
       <List.Item
         title="Alterar PIN"
         left={(props) => <List.Icon {...props} icon="lock-reset" />}
@@ -93,5 +103,8 @@ const styles = StyleSheet.create({
   },
   segmented: {
     marginTop: spacing.xs,
+  },
+  error: {
+    color: colors.expense,
   },
 });
