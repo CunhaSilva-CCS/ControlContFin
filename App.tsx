@@ -1,11 +1,43 @@
+import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { PaperProvider } from 'react-native-paper';
+import { StyleSheet, View } from 'react-native';
+import { ActivityIndicator, PaperProvider, Text } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { paperTheme } from '@/constants/theme';
+import { defaultCategories } from '@/constants/seedCategories';
+import { colors, paperTheme, spacing } from '@/constants/theme';
+import { db } from '@/db/client';
+import { useDatabaseMigrations } from '@/db/migrationsHook';
+import { seedDefaultCategories } from '@/db/repositories/categories';
 import { RootNavigator } from '@/navigation/RootNavigator';
 
 export default function App() {
+  const { success, error } = useDatabaseMigrations();
+  const [seeded, setSeeded] = useState(false);
+
+  useEffect(() => {
+    if (!success) {
+      return;
+    }
+    seedDefaultCategories(db, defaultCategories).then(() => setSeeded(true));
+  }, [success]);
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text variant="bodyMedium">Erro ao preparar o banco de dados: {error.message}</Text>
+      </View>
+    );
+  }
+
+  if (!success || !seeded) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator animating size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <PaperProvider theme={paperTheme}>
@@ -15,3 +47,13 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.lg,
+    backgroundColor: colors.background,
+  },
+});

@@ -12,8 +12,8 @@ export type DashboardStackParamList = {
 
 export type TransactionsStackParamList = {
   TransactionsList: undefined;
-  TransactionForm: { transactionId?: string } | undefined;
-  TransactionDetail: { transactionId: string };
+  TransactionForm: { transactionId?: number } | undefined;
+  TransactionDetail: { transactionId: number };
 };
 
 export type BudgetsGoalsStackParamList = {
@@ -26,4 +26,6 @@ export type ReportsStackParamList = {
 
 export type SettingsStackParamList = {
   SettingsHome: undefined;
+  AccountsList: undefined;
+  AccountForm: { accountId?: number } | undefined;
 };
