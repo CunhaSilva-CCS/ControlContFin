@@ -6,11 +6,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LockScreen } from '@/screens/Auth/LockScreen';
 import { PinSetupScreen } from '@/screens/Auth/PinSetupScreen';
+import { PrivacyOverlay } from '@/components/common/PrivacyOverlay';
 import { defaultCategories } from '@/constants/seedCategories';
 import { colors, paperTheme, spacing } from '@/constants/theme';
 import { db } from '@/db/client';
 import { useDatabaseMigrations } from '@/db/migrationsHook';
 import { seedDefaultCategories } from '@/db/repositories/categories';
+import { useAppSwitcherPrivacy } from '@/hooks/useAppSwitcherPrivacy';
 import { useAutoLock } from '@/hooks/useAutoLock';
 import { useAutomaticBackup } from '@/hooks/useAutomaticBackup';
 import { useRecurringGeneration } from '@/hooks/useRecurringGeneration';
@@ -57,6 +59,7 @@ function AppShell() {
 
 export default function App() {
   const authStatus = useAutoLock();
+  const hideFromAppSwitcher = useAppSwitcherPrivacy();
   const setStatus = useAuthStore((state) => state.setStatus);
   const setSettings = useAuthStore((state) => state.setSettings);
 
@@ -86,6 +89,7 @@ export default function App() {
         {authStatus === 'needs_setup' && <PinSetupScreen />}
         {authStatus === 'locked' && <LockScreen />}
         {authStatus === 'unlocked' && <AppShell />}
+        {hideFromAppSwitcher && <PrivacyOverlay />}
         <StatusBar style="auto" />
       </PaperProvider>
     </SafeAreaProvider>

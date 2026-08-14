@@ -1,16 +1,20 @@
 import * as SecureStore from 'expo-secure-store';
 
 const AUTH_CONFIG_KEY = 'controlcontfin_auth_config';
-const LOCKOUT_STATE_KEY = 'controlcontfin_auth_lockout';
 
+/**
+ * A single secure-store entry holding both the PIN credential and the
+ * lockout counters. Keeping them together (rather than two independent
+ * entries) means there's no way to selectively wipe just the failed-attempt
+ * counter while leaving the hash in place — tampering with one means
+ * tampering with the other, which the app already treats as "no PIN
+ * configured" (forces a fresh setup) rather than a silent lockout reset.
+ */
 export type AuthConfig = {
   salt: string;
   hash: string;
   biometricEnabled: boolean;
   autoLockMinutes: number;
-};
-
-export type LockoutState = {
   failedAttempts: number;
   lastFailedAtMs: number;
 };
@@ -26,18 +30,4 @@ export async function setAuthConfig(config: AuthConfig): Promise<void> {
 
 export async function clearAuthConfig(): Promise<void> {
   await SecureStore.deleteItemAsync(AUTH_CONFIG_KEY);
-  await SecureStore.deleteItemAsync(LOCKOUT_STATE_KEY);
-}
-
-export async function getLockoutState(): Promise<LockoutState> {
-  const raw = await SecureStore.getItemAsync(LOCKOUT_STATE_KEY);
-  return raw ? (JSON.parse(raw) as LockoutState) : { failedAttempts: 0, lastFailedAtMs: 0 };
-}
-
-export async function setLockoutState(state: LockoutState): Promise<void> {
-  await SecureStore.setItemAsync(LOCKOUT_STATE_KEY, JSON.stringify(state));
-}
-
-export async function resetLockoutState(): Promise<void> {
-  await setLockoutState({ failedAttempts: 0, lastFailedAtMs: 0 });
 }

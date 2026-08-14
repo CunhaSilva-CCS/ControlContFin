@@ -24,7 +24,7 @@ App de controle financeiro pessoal completo para iOS e Android, feito com Expo (
 - expo-notifications + expo-task-manager + expo-background-task (lembretes e geração de recorrências)
 - react-native-gifted-charts (gráficos)
 - expo-file-system + expo-sharing + expo-document-picker (exportação e backup)
-- expo-secure-store + expo-crypto + expo-local-authentication (PIN e biometria)
+- expo-secure-store + expo-crypto + expo-local-authentication + @noble/hashes (PIN e biometria)
 - SQLCipher (via plugin nativo do expo-sqlite) + aes-js (criptografia em repouso)
 
 ## Segurança
@@ -63,8 +63,11 @@ etc.), sem passar pelo app.
 O app é protegido por um PIN numérico de 6 dígitos, obrigatório desde o primeiro uso:
 
 - **Armazenamento**: o PIN nunca é salvo em texto puro. É gerado um salt aleatório por
-  instalação e o hash (SHA-256 encadeado) fica em `expo-secure-store`, que usa o Keychain
-  (iOS) / Keystore (Android) do sistema.
+  instalação e o hash — **PBKDF2-HMAC-SHA256 com 100.000 iterações** (`@noble/hashes`, roda
+  inteiramente em JS puro, sem depender de round-trips pela ponte nativa) — fica em
+  `expo-secure-store`, que usa o Keychain (iOS) / Keystore (Android) do sistema. O contador de
+  tentativas incorretas fica **na mesma entrada** do salt/hash (não em uma chave separada), para
+  que não seja possível zerar o bloqueio sem também apagar a credencial.
 - **Política de PIN**: exige exatamente 6 dígitos numéricos e rejeita PINs óbvios (todos os
   dígitos iguais ou sequências como `123456`/`987654`) — ver `src/services/auth/pinPolicy.ts`.
 - **Segundo fator (MFA)**: quando o aparelho tem biometria disponível, o usuário pode exigir
@@ -75,8 +78,18 @@ O app é protegido por um PIN numérico de 6 dígitos, obrigatório desde o prim
   `src/services/auth/lockoutPolicy.ts`.
 - **Bloqueio automático**: o app volta a pedir PIN/biometria depois de ficar em segundo plano
   por um tempo configurável (imediato, 1, 5 ou 15 min) em Ajustes → Segurança.
+- **Privacidade no app-switcher**: assim que o app sai de primeiro plano, um overlay cobre a
+  tela imediatamente (antes do sistema tirar a miniatura de apps recentes) — independente do
+  timer de bloqueio automático, que é mais lento (`src/hooks/useAppSwitcherPrivacy.ts`).
 - **PIN esquecido**: a tela de bloqueio tem uma opção para remover a proteção e criar um novo
   PIN — isso nunca apaga os dados financeiros, só reseta o bloqueio.
+
+> Uma auditoria de segurança rodada nesta branch encontrou e corrigiu os dois pontos acima
+> (hash fraco e lockout isolado) e mais alguns itens médios (limpeza de arquivos de
+> export/backup manual, atualização do `drizzle-orm`, build de produção sem `expo-dev-client`
+> via `app.config.js`/`eas.json`). O fallback de biometria para a senha do aparelho e a falta
+> de autenticação (MAC) no backup automático ficaram documentados como possível trabalho
+> futuro, não corrigidos nesta rodada.
 
 ## Rodando o projeto
 
@@ -98,6 +111,11 @@ npm start
 > eas build --profile development --platform android   # ou ios
 > ```
 > Depois de instalar esse build no aparelho, `npm start` conecta nele normalmente.
+
+Quando for gerar uma build de verdade para a loja, use o perfil `production`
+(`eas build --profile production --platform android`), que já vem configurado em `eas.json`
+para **não** incluir o `expo-dev-client` (menu de desenvolvedor/carregamento remoto de bundle)
+— ver [Segurança](#segurança).
 
 ## Scripts
 

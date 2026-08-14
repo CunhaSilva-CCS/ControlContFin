@@ -1,20 +1,25 @@
-export type Sha256Fn = (input: string) => Promise<string>;
-
-const HASH_ROUNDS = 50;
+import { pbkdf2Async } from '@noble/hashes/pbkdf2.js';
+import { sha256 } from '@noble/hashes/sha2.js';
+import { bytesToHex } from '@noble/hashes/utils.js';
 
 /**
- * Chains SHA-256 `HASH_ROUNDS` times over salt+pin as a lightweight stretch
- * against offline brute force. Each round crosses the native bridge, so the
- * count is kept modest to avoid slowing down every unlock; the real defenses
- * against a short local PIN are the escalating lockout and OS-encrypted
- * storage of the salt/hash, not the stretch factor itself.
+ * PBKDF2-HMAC-SHA256 iteration count, in line with OWASP's guidance (well
+ * above the 100k floor commonly recommended for this hash). Runs entirely in
+ * JS — unlike the previous approach (SHA-256 chained through the native
+ * expo-crypto bridge once per round), there's no per-round bridge round trip
+ * here, so raising this further is cheap. The right number ultimately
+ * depends on measuring unlock latency on real target devices, which isn't
+ * possible in this sandboxed environment (no simulator/device attached).
  */
-export async function hashPin(pin: string, salt: string, sha256: Sha256Fn): Promise<string> {
-  let value = `${salt}:${pin}`;
-  for (let round = 0; round < HASH_ROUNDS; round += 1) {
-    value = await sha256(value);
-  }
-  return value;
+const PBKDF2_ITERATIONS = 100_000;
+const DERIVED_KEY_BYTES = 32;
+
+export async function hashPin(pin: string, salt: string): Promise<string> {
+  const derived = await pbkdf2Async(sha256, pin, salt, {
+    c: PBKDF2_ITERATIONS,
+    dkLen: DERIVED_KEY_BYTES,
+  });
+  return bytesToHex(derived);
 }
 
 function timingSafeEqual(a: string, b: string): boolean {
@@ -28,12 +33,7 @@ function timingSafeEqual(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
-export async function verifyPin(
-  pin: string,
-  salt: string,
-  expectedHash: string,
-  sha256: Sha256Fn,
-): Promise<boolean> {
-  const candidateHash = await hashPin(pin, salt, sha256);
+export async function verifyPin(pin: string, salt: string, expectedHash: string): Promise<boolean> {
+  const candidateHash = await hashPin(pin, salt);
   return timingSafeEqual(candidateHash, expectedHash);
 }

@@ -1,16 +1,8 @@
-import { generateSalt, sha256 } from './cryptoProvider';
+import { generateSalt } from './cryptoProvider';
 import { isLockedOut, lockoutRemainingMs } from './lockoutPolicy';
 import { hashPin, verifyPin } from './pinCrypto';
 import { validatePinStrength } from './pinPolicy';
-import {
-  clearAuthConfig,
-  getAuthConfig,
-  getLockoutState,
-  resetLockoutState,
-  setAuthConfig,
-  setLockoutState,
-  type AuthConfig,
-} from './secureStorage';
+import { clearAuthConfig, getAuthConfig, setAuthConfig, type AuthConfig } from './secureStorage';
 
 export const DEFAULT_AUTO_LOCK_MINUTES = 1;
 
@@ -34,14 +26,15 @@ export async function setupPin(pin: string): Promise<{ success: boolean; reason?
   }
 
   const salt = generateSalt();
-  const hash = await hashPin(pin, salt, sha256);
+  const hash = await hashPin(pin, salt);
   await setAuthConfig({
     salt,
     hash,
     biometricEnabled: false,
     autoLockMinutes: DEFAULT_AUTO_LOCK_MINUTES,
+    failedAttempts: 0,
+    lastFailedAtMs: 0,
   });
-  await resetLockoutState();
   return { success: true };
 }
 
@@ -53,7 +46,7 @@ export async function changePin(
   if (!config) {
     return { success: false, reason: 'Nenhum PIN configurado.' };
   }
-  const currentValid = await verifyPin(currentPin, config.salt, config.hash, sha256);
+  const currentValid = await verifyPin(currentPin, config.salt, config.hash);
   if (!currentValid) {
     return { success: false, reason: 'PIN atual incorreto.' };
   }
@@ -64,8 +57,8 @@ export async function changePin(
   }
 
   const salt = generateSalt();
-  const hash = await hashPin(newPin, salt, sha256);
-  await setAuthConfig({ ...config, salt, hash });
+  const hash = await hashPin(newPin, salt);
+  await setAuthConfig({ ...config, salt, hash, failedAttempts: 0, lastFailedAtMs: 0 });
   return { success: true };
 }
 
@@ -77,7 +70,9 @@ export type PinAttemptResult =
 /**
  * Verifies a PIN attempt against the escalating lockout policy, updating the
  * persisted attempt counter either way. `remainingMs` on an incorrect result
- * reflects the lockout that attempt just triggered, if any.
+ * reflects the lockout that attempt just triggered, if any. The lockout
+ * counters live in the same secure-store entry as the credential (see
+ * secureStorage.ts), so they can't be reset independently of it.
  */
 export async function verifyPinAttempt(pin: string): Promise<PinAttemptResult> {
   const config = await getAuthConfig();
@@ -86,19 +81,21 @@ export async function verifyPinAttempt(pin: string): Promise<PinAttemptResult> {
   }
 
   const now = Date.now();
-  const lockout = await getLockoutState();
-  if (isLockedOut(lockout.failedAttempts, lockout.lastFailedAtMs, now)) {
-    return { outcome: 'locked_out', remainingMs: lockoutRemainingMs(lockout.failedAttempts, lockout.lastFailedAtMs, now) };
+  if (isLockedOut(config.failedAttempts, config.lastFailedAtMs, now)) {
+    return {
+      outcome: 'locked_out',
+      remainingMs: lockoutRemainingMs(config.failedAttempts, config.lastFailedAtMs, now),
+    };
   }
 
-  const isValid = await verifyPin(pin, config.salt, config.hash, sha256);
+  const isValid = await verifyPin(pin, config.salt, config.hash);
   if (isValid) {
-    await resetLockoutState();
+    await setAuthConfig({ ...config, failedAttempts: 0, lastFailedAtMs: 0 });
     return { outcome: 'success' };
   }
 
-  const failedAttempts = lockout.failedAttempts + 1;
-  await setLockoutState({ failedAttempts, lastFailedAtMs: now });
+  const failedAttempts = config.failedAttempts + 1;
+  await setAuthConfig({ ...config, failedAttempts, lastFailedAtMs: now });
   return { outcome: 'incorrect', remainingMs: lockoutRemainingMs(failedAttempts, now, now) };
 }
 
