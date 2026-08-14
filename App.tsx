@@ -4,18 +4,23 @@ import { StyleSheet, View } from 'react-native';
 import { ActivityIndicator, PaperProvider, Text } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { LockScreen } from '@/screens/Auth/LockScreen';
+import { PinSetupScreen } from '@/screens/Auth/PinSetupScreen';
 import { defaultCategories } from '@/constants/seedCategories';
 import { colors, paperTheme, spacing } from '@/constants/theme';
 import { db } from '@/db/client';
 import { useDatabaseMigrations } from '@/db/migrationsHook';
 import { seedDefaultCategories } from '@/db/repositories/categories';
+import { useAutoLock } from '@/hooks/useAutoLock';
 import { useAutomaticBackup } from '@/hooks/useAutomaticBackup';
 import { useRecurringGeneration } from '@/hooks/useRecurringGeneration';
 import { RootNavigator } from '@/navigation/RootNavigator';
+import { getAuthSettings, isAppLockConfigured } from '@/services/auth/authService';
 import { registerRecurringBackgroundTask } from '@/services/backgroundTask';
 import { ensureNotificationSetup } from '@/services/notifications';
+import { useAuthStore } from '@/store/authStore';
 
-export default function App() {
+function AppShell() {
   const { success, error } = useDatabaseMigrations();
   const [seeded, setSeeded] = useState(false);
 
@@ -47,10 +52,40 @@ export default function App() {
     );
   }
 
+  return <RootNavigator />;
+}
+
+export default function App() {
+  const authStatus = useAutoLock();
+  const setStatus = useAuthStore((state) => state.setStatus);
+  const setSettings = useAuthStore((state) => state.setSettings);
+
+  useEffect(() => {
+    isAppLockConfigured().then(async (configured) => {
+      if (!configured) {
+        setStatus('needs_setup');
+        return;
+      }
+      const settings = await getAuthSettings();
+      if (settings) {
+        setSettings(settings);
+      }
+      setStatus('locked');
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <SafeAreaProvider>
       <PaperProvider theme={paperTheme}>
-        <RootNavigator />
+        {authStatus === 'loading' && (
+          <View style={styles.center}>
+            <ActivityIndicator animating size="large" color={colors.primary} />
+          </View>
+        )}
+        {authStatus === 'needs_setup' && <PinSetupScreen />}
+        {authStatus === 'locked' && <LockScreen />}
+        {authStatus === 'unlocked' && <AppShell />}
         <StatusBar style="auto" />
       </PaperProvider>
     </SafeAreaProvider>

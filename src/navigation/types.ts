@@ -28,6 +28,8 @@ export type SettingsStackParamList = {
   RecurringRulesList: undefined;
   RecurringRuleForm: { ruleId?: number } | undefined;
   Backup: undefined;
+  SecuritySettings: undefined;
+  ChangePin: undefined;
 };
 
 export type RootTabParamList = {

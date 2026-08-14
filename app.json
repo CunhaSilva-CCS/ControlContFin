@@ -25,7 +25,19 @@
       "expo-notifications",
       "expo-task-manager",
       "expo-background-task",
-      "expo-dev-client"
+      "expo-dev-client",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permitir que o ControlContFin use o Face ID para desbloquear o app."
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Permitir que o ControlContFin use o Face ID para proteger seus dados de acesso."
+        }
+      ]
     ]
   }
 }
