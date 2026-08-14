@@ -16,6 +16,7 @@ export function PinSetupScreen() {
   const [firstPin, setFirstPin] = useState('');
   const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [biometricError, setBiometricError] = useState<string | null>(null);
   const setStatus = useAuthStore((state) => state.setStatus);
   const setSettings = useAuthStore((state) => state.setSettings);
 
@@ -67,10 +68,23 @@ export function PinSetupScreen() {
   }
 
   async function handleEnableBiometric(enabled: boolean) {
-    if (enabled) {
-      await setBiometricEnabled(true);
+    if (!enabled) {
+      finishSetup(false);
+      return;
     }
-    finishSetup(enabled);
+
+    try {
+      await setBiometricEnabled(true);
+      finishSetup(true);
+    } catch {
+      // The PIN itself was already saved successfully — a failure to enable
+      // the optional biometric factor shouldn't block access to the app, but
+      // finishSetup() below unmounts this screen immediately, so the error
+      // must be shown and acknowledged first rather than set and discarded.
+      setBiometricError(
+        'Não foi possível ativar a biometria agora. Você pode continuar só com o PIN e tentar de novo depois em Ajustes → Segurança.',
+      );
+    }
   }
 
   if (step === 'biometric') {
@@ -83,11 +97,18 @@ export function PinSetupScreen() {
           Com a autenticação em duas etapas ativada, além do PIN você também vai precisar
           confirmar sua digital ou reconhecimento facial para abrir o app.
         </Text>
-        <Button mode="contained" style={styles.actionButton} onPress={() => handleEnableBiometric(true)}>
-          Ativar biometria (recomendado)
-        </Button>
-        <Button mode="outlined" onPress={() => handleEnableBiometric(false)}>
-          Usar apenas PIN
+        {biometricError && (
+          <Text variant="bodyMedium" style={styles.error}>
+            {biometricError}
+          </Text>
+        )}
+        {!biometricError && (
+          <Button mode="contained" style={styles.actionButton} onPress={() => handleEnableBiometric(true)}>
+            Ativar biometria (recomendado)
+          </Button>
+        )}
+        <Button mode="outlined" onPress={() => finishSetup(false)}>
+          {biometricError ? 'Continuar sem biometria' : 'Usar apenas PIN'}
         </Button>
       </View>
     );
