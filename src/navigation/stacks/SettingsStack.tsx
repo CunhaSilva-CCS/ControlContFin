@@ -3,8 +3,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AccountFormScreen } from '@/screens/Settings/AccountFormScreen';
 import { AccountsListScreen } from '@/screens/Settings/AccountsListScreen';
 import { BackupScreen } from '@/screens/Settings/BackupScreen';
+import { ChangePinScreen } from '@/screens/Settings/ChangePinScreen';
 import { RecurringRuleFormScreen } from '@/screens/Settings/RecurringRuleFormScreen';
 import { RecurringRulesListScreen } from '@/screens/Settings/RecurringRulesListScreen';
+import { SecuritySettingsScreen } from '@/screens/Settings/SecuritySettingsScreen';
 import { SettingsScreen } from '@/screens/Settings/SettingsScreen';
 
 import type { SettingsStackParamList } from '../types';
@@ -32,6 +34,12 @@ export function SettingsStack() {
         options={{ title: 'Recorrência' }}
       />
       <Stack.Screen name="Backup" component={BackupScreen} options={{ title: 'Backup' }} />
+      <Stack.Screen
+        name="SecuritySettings"
+        component={SecuritySettingsScreen}
+        options={{ title: 'Segurança' }}
+      />
+      <Stack.Screen name="ChangePin" component={ChangePinScreen} options={{ title: 'Alterar PIN' }} />
     </Stack.Navigator>
   );
 }

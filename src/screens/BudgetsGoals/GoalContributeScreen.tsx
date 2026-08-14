@@ -9,6 +9,7 @@ import { db } from '@/db/client';
 import { contributeToGoal, deleteGoal, getGoal } from '@/db/repositories/goals';
 import type { BudgetsGoalsStackParamList } from '@/navigation/types';
 import { calculateGoalProgress } from '@/services/goalCalculations';
+import { useDataStore } from '@/store/dataStore';
 import { centsToBRL } from '@/utils/currency';
 import { todayISODate } from '@/utils/date';
 import type { goals } from '@/db/schema';
@@ -21,10 +22,14 @@ export function GoalContributeScreen({ route, navigation }: Props) {
   const { goalId } = route.params;
   const [goal, setGoal] = useState<Goal | null>(null);
   const [contributionCents, setContributionCents] = useState(0);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const goalsVersion = useDataStore((state) => state.version.goals);
 
   useEffect(() => {
-    getGoal(db, goalId).then((row) => setGoal(row ?? null));
-  }, [goalId]);
+    getGoal(db, goalId)
+      .then((row) => setGoal(row ?? null))
+      .catch(() => setLoadError('Não foi possível carregar esta meta.'));
+  }, [goalId, goalsVersion]);
 
   async function handleContribute() {
     if (contributionCents <= 0) {
@@ -37,6 +42,16 @@ export function GoalContributeScreen({ route, navigation }: Props) {
   async function handleDelete() {
     await deleteGoal(db, goalId);
     navigation.goBack();
+  }
+
+  if (loadError) {
+    return (
+      <View style={styles.container}>
+        <Text variant="bodyMedium" style={styles.error}>
+          {loadError}
+        </Text>
+      </View>
+    );
   }
 
   if (!goal) {
@@ -88,5 +103,8 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     marginTop: spacing.sm,
+  },
+  error: {
+    color: colors.expense,
   },
 });

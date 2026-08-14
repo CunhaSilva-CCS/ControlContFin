@@ -1,13 +1,14 @@
 {
   "expo": {
-    "name": "controlcontfin",
+    "name": "ControlContFin",
     "slug": "controlcontfin",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cunhasilva.controlcontfin"
     },
     "android": {
       "adaptiveIcon": {
@@ -16,7 +17,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.cunhasilva.controlcontfin"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -25,7 +27,34 @@
       "expo-notifications",
       "expo-task-manager",
       "expo-background-task",
-      "expo-dev-client"
+      "expo-dev-client",
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permitir que o ControlContFin use o Face ID para desbloquear o app."
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Permitir que o ControlContFin use o Face ID para proteger seus dados de acesso."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#F7F8F6"
+        }
+      ]
     ]
   }
 }

@@ -1,13 +1,13 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { Button, TextInput } from 'react-native-paper';
+import { Button, Text, TextInput } from 'react-native-paper';
 
 import { AmountInput } from '@/components/common/AmountInput';
 import { ColorSwatchPicker } from '@/components/common/ColorSwatchPicker';
 import { DateField } from '@/components/common/DateField';
 import { accountColorPalette } from '@/constants/accountPresets';
-import { spacing } from '@/constants/theme';
+import { colors, spacing } from '@/constants/theme';
 import { db } from '@/db/client';
 import { createGoal, getGoal, updateGoal } from '@/db/repositories/goals';
 import type { BudgetsGoalsStackParamList } from '@/navigation/types';
@@ -26,22 +26,25 @@ export function GoalFormScreen({ route, navigation }: Props) {
   const [deadline, setDeadline] = useState(todayISODate());
   const [hasDeadline, setHasDeadline] = useState(false);
   const [color, setColor] = useState(accountColorPalette[0]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isEditing || !goalId) {
       return;
     }
-    getGoal(db, goalId).then((existing) => {
-      if (existing) {
-        setName(existing.name);
-        setTargetCents(existing.targetCents);
-        setColor(existing.color);
-        if (existing.deadline) {
-          setDeadline(existing.deadline);
-          setHasDeadline(true);
+    getGoal(db, goalId)
+      .then((existing) => {
+        if (existing) {
+          setName(existing.name);
+          setTargetCents(existing.targetCents);
+          setColor(existing.color);
+          if (existing.deadline) {
+            setDeadline(existing.deadline);
+            setHasDeadline(true);
+          }
         }
-      }
-    });
+      })
+      .catch(() => setLoadError('Não foi possível carregar esta meta.'));
   }, [isEditing, goalId]);
 
   const canSave = name.trim().length > 0 && targetCents > 0;
@@ -67,6 +70,11 @@ export function GoalFormScreen({ route, navigation }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {loadError && (
+        <Text variant="bodyMedium" style={styles.error}>
+          {loadError}
+        </Text>
+      )}
       <TextInput label="Nome da meta" mode="outlined" value={name} onChangeText={setName} />
 
       <AmountInput label="Valor alvo" valueCents={targetCents} onChangeCents={setTargetCents} />
@@ -93,5 +101,8 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: spacing.md,
+  },
+  error: {
+    color: colors.expense,
   },
 });

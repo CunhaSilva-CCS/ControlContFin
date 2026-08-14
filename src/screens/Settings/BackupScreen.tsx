@@ -63,8 +63,10 @@ export function BackupScreen() {
   return (
     <View style={styles.container}>
       <Text variant="bodyMedium">
-        O app faz um backup automático local todos os dias. Você também pode exportar ou
-        restaurar um backup manualmente a qualquer momento.
+        O app faz um backup automático local todos os dias, criptografado com a mesma chave que
+        protege o banco de dados. Você também pode exportar ou restaurar um backup manualmente a
+        qualquer momento — o arquivo exportado para compartilhamento não é criptografado, então
+        trate-o como um documento sensível.
       </Text>
 
       <Button mode="contained" onPress={handleManualBackup}>

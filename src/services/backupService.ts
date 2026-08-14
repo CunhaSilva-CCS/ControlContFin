@@ -13,6 +13,7 @@ import {
 import { useDataStore } from '@/store/dataStore';
 
 import { filesToPrune, shouldCreateBackup } from './backupRetention';
+import { encryptBackupPayload } from './backupEncryption';
 
 const BACKUP_SNAPSHOT_VERSION = 1;
 const BACKUP_RETENTION_COUNT = 5;
@@ -123,7 +124,8 @@ function backupsDirectory(): Directory {
 }
 
 function backupFilename(isoTimestamp: string): string {
-  return `backup-${isoTimestamp.replace(/[:.]/g, '-')}.json`;
+  // .enc (not .json) since the contents are AES-encrypted, not plain JSON.
+  return `backup-${isoTimestamp.replace(/[:.]/g, '-')}.enc`;
 }
 
 function listBackupFiles(): File[] {
@@ -152,7 +154,7 @@ export async function runAutomaticBackupIfDue(db: AppDatabase, todayISODate: str
   const snapshot = await buildBackupSnapshot(db);
   const file = new File(backupsDirectory(), backupFilename(snapshot.createdAt));
   file.create();
-  file.write(JSON.stringify(snapshot));
+  file.write(encryptBackupPayload(JSON.stringify(snapshot)));
 
   const names = listBackupFiles().map((entry) => entry.name);
   for (const name of filesToPrune(names, BACKUP_RETENTION_COUNT)) {
@@ -164,7 +166,7 @@ export function listAutomaticBackups(): { name: string; createdAt: string }[] {
   return listBackupFiles()
     .map((file) => ({
       name: file.name,
-      createdAt: file.name.replace('backup-', '').replace('.json', ''),
+      createdAt: file.name.replace('backup-', '').replace('.enc', ''),
     }))
     .reverse();
 }

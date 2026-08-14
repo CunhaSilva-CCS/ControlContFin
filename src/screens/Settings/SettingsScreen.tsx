@@ -27,6 +27,12 @@ export function SettingsScreen({ navigation }: Props) {
         left={(props) => <List.Icon {...props} icon="cloud-upload" />}
         onPress={() => navigation.navigate('Backup')}
       />
+      <List.Item
+        title="Segurança"
+        description="PIN, biometria e bloqueio automático"
+        left={(props) => <List.Icon {...props} icon="shield-lock" />}
+        onPress={() => navigation.navigate('SecuritySettings')}
+      />
     </List.Section>
   );
 }
