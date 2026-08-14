@@ -53,6 +53,7 @@ export function TransactionsListScreen({ navigation }: Props) {
       <FAB
         icon="plus"
         style={styles.fab}
+        accessibilityLabel="Nova transação"
         onPress={() => navigation.navigate('TransactionForm', undefined)}
       />
     </View>

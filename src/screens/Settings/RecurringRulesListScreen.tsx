@@ -30,6 +30,8 @@ export function RecurringRulesListScreen({ navigation }: Props) {
             <Pressable
               onPress={() => navigation.navigate('RecurringRuleForm', { ruleId: item.id })}
               style={styles.row}
+              accessibilityRole="button"
+              accessibilityLabel={`${item.description || 'Recorrência'}, ${frequencyLabels[item.frequency]}, ${centsToBRL(item.amountCents)}`}
             >
               <View>
                 <Text variant="bodyMedium">{item.description || 'Recorrência'}</Text>
@@ -46,6 +48,7 @@ export function RecurringRulesListScreen({ navigation }: Props) {
       <FAB
         icon="plus"
         style={styles.fab}
+        accessibilityLabel="Nova transação recorrente"
         onPress={() => navigation.navigate('RecurringRuleForm', undefined)}
       />
     </View>

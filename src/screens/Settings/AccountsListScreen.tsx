@@ -29,6 +29,8 @@ export function AccountsListScreen({ navigation }: Props) {
             <Pressable
               onPress={() => navigation.navigate('AccountForm', { accountId: item.id })}
               style={styles.row}
+              accessibilityRole="button"
+              accessibilityLabel={`${item.name}, ${accountTypeLabels[item.type] ?? item.type}, ${centsToBRL(item.initialBalanceCents)}`}
             >
               <View>
                 <Text variant="bodyMedium">{item.name}</Text>
@@ -44,6 +46,7 @@ export function AccountsListScreen({ navigation }: Props) {
       <FAB
         icon="plus"
         style={styles.fab}
+        accessibilityLabel="Nova conta"
         onPress={() => navigation.navigate('AccountForm', undefined)}
       />
     </View>

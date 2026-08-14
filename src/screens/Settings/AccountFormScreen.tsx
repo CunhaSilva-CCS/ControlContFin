@@ -1,9 +1,10 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { Button, SegmentedButtons, TextInput } from 'react-native-paper';
 
 import { AmountInput } from '@/components/common/AmountInput';
+import { ColorSwatchPicker } from '@/components/common/ColorSwatchPicker';
 import { accountColorPalette, accountIconByType, accountTypeLabels } from '@/constants/accountPresets';
 import { spacing } from '@/constants/theme';
 import { db } from '@/db/client';
@@ -76,19 +77,7 @@ export function AccountFormScreen({ route, navigation }: Props) {
         onChangeCents={setInitialBalanceCents}
       />
 
-      <View style={styles.colorRow}>
-        {accountColorPalette.map((paletteColor) => (
-          <View
-            key={paletteColor}
-            onTouchEnd={() => setColor(paletteColor)}
-            style={[
-              styles.colorSwatch,
-              { backgroundColor: paletteColor },
-              color === paletteColor && styles.colorSwatchSelected,
-            ]}
-          />
-        ))}
-      </View>
+      <ColorSwatchPicker colors={accountColorPalette} selectedColor={color} onSelect={setColor} />
 
       <Button mode="contained" onPress={handleSave} disabled={!canSave} style={styles.saveButton}>
         Salvar
@@ -101,20 +90,6 @@ const styles = StyleSheet.create({
   container: {
     padding: spacing.md,
     gap: spacing.md,
-  },
-  colorRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  colorSwatch: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-  colorSwatchSelected: {
-    borderWidth: 3,
-    borderColor: '#000000',
   },
   saveButton: {
     marginTop: spacing.md,

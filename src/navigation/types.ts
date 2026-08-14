@@ -1,10 +1,4 @@
-export type RootTabParamList = {
-  Dashboard: undefined;
-  Transactions: undefined;
-  BudgetsGoals: undefined;
-  Reports: undefined;
-  Settings: undefined;
-};
+import type { NavigatorScreenParams } from '@react-navigation/native';
 
 export type DashboardStackParamList = {
   DashboardHome: undefined;
@@ -33,4 +27,13 @@ export type SettingsStackParamList = {
   AccountForm: { accountId?: number } | undefined;
   RecurringRulesList: undefined;
   RecurringRuleForm: { ruleId?: number } | undefined;
+  Backup: undefined;
+};
+
+export type RootTabParamList = {
+  Dashboard: NavigatorScreenParams<DashboardStackParamList>;
+  Transactions: NavigatorScreenParams<TransactionsStackParamList>;
+  BudgetsGoals: NavigatorScreenParams<BudgetsGoalsStackParamList>;
+  Reports: NavigatorScreenParams<ReportsStackParamList>;
+  Settings: NavigatorScreenParams<SettingsStackParamList>;
 };

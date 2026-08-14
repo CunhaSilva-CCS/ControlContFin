@@ -31,8 +31,12 @@ export function TransactionRow({ transaction, onPress }: TransactionRowProps) {
         : colors.textPrimary;
   const sign = transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : '';
 
+  const label = `${transaction.description || transaction.categoryName || 'Transação'}, ${sign}${centsToBRL(
+    transaction.amountCents,
+  )}, ${formatDatePtBR(transaction.date)}`;
+
   return (
-    <Pressable onPress={onPress} style={styles.row}>
+    <Pressable onPress={onPress} style={styles.row} accessibilityRole="button" accessibilityLabel={label}>
       <View
         style={[
           styles.iconCircle,

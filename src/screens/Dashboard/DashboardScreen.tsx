@@ -1,3 +1,6 @@
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 
@@ -7,7 +10,13 @@ import { useAccounts } from '@/hooks/useAccounts';
 import { useAccountBalance, useTotalBalance } from '@/hooks/useAccountBalance';
 import { useCategories } from '@/hooks/useCategories';
 import { useTransactions } from '@/hooks/useTransactions';
+import type { DashboardStackParamList, RootTabParamList } from '@/navigation/types';
 import { centsToBRL } from '@/utils/currency';
+
+type Props = CompositeScreenProps<
+  NativeStackScreenProps<DashboardStackParamList, 'DashboardHome'>,
+  BottomTabScreenProps<RootTabParamList>
+>;
 
 function AccountBalanceRow({ accountId, name }: { accountId: number; name: string }) {
   const { balanceCents } = useAccountBalance(accountId);
@@ -19,7 +28,7 @@ function AccountBalanceRow({ accountId, name }: { accountId: number; name: strin
   );
 }
 
-export function DashboardScreen() {
+export function DashboardScreen({ navigation }: Props) {
   const { totalCents } = useTotalBalance();
   const { accounts } = useAccounts();
   const { categories } = useCategories();
@@ -40,6 +49,10 @@ export function DashboardScreen() {
     };
   });
 
+  function openTransaction(transactionId: number) {
+    navigation.navigate('Transactions', { screen: 'TransactionDetail', params: { transactionId } });
+  }
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Card style={styles.balanceCard}>
@@ -55,7 +68,9 @@ export function DashboardScreen() {
       <Card>
         <Card.Content>
           {accounts.length === 0 ? (
-            <Text variant="bodyMedium">Nenhuma conta cadastrada ainda.</Text>
+            <Text variant="bodyMedium">
+              Nenhuma conta cadastrada ainda. Vá em Ajustes {'>'} Contas para criar a primeira.
+            </Text>
           ) : (
             accounts.map((account) => (
               <AccountBalanceRow key={account.id} accountId={account.id} name={account.name} />
@@ -72,7 +87,11 @@ export function DashboardScreen() {
           </Card.Content>
         ) : (
           recentTransactions.map((transaction) => (
-            <TransactionRow key={transaction.id} transaction={transaction} onPress={() => {}} />
+            <TransactionRow
+              key={transaction.id}
+              transaction={transaction}
+              onPress={() => openTransaction(transaction.id)}
+            />
           ))
         )}
       </Card>

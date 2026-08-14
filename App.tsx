@@ -9,6 +9,7 @@ import { colors, paperTheme, spacing } from '@/constants/theme';
 import { db } from '@/db/client';
 import { useDatabaseMigrations } from '@/db/migrationsHook';
 import { seedDefaultCategories } from '@/db/repositories/categories';
+import { useAutomaticBackup } from '@/hooks/useAutomaticBackup';
 import { useRecurringGeneration } from '@/hooks/useRecurringGeneration';
 import { RootNavigator } from '@/navigation/RootNavigator';
 import { registerRecurringBackgroundTask } from '@/services/backgroundTask';
@@ -28,6 +29,7 @@ export default function App() {
   }, [success]);
 
   useRecurringGeneration(seeded);
+  useAutomaticBackup(seeded);
 
   if (error) {
     return (

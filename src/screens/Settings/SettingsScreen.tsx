@@ -21,6 +21,12 @@ export function SettingsScreen({ navigation }: Props) {
         left={(props) => <List.Icon {...props} icon="sync" />}
         onPress={() => navigation.navigate('RecurringRulesList')}
       />
+      <List.Item
+        title="Backup"
+        description="Backup automático diário, exportação e restauração"
+        left={(props) => <List.Icon {...props} icon="cloud-upload" />}
+        onPress={() => navigation.navigate('Backup')}
+      />
     </List.Section>
   );
 }

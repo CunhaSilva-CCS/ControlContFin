@@ -37,6 +37,7 @@ export function BudgetsGoalsScreen({ navigation }: Props) {
       <FAB
         icon="plus"
         style={styles.fab}
+        accessibilityLabel={view === 'budgets' ? 'Novo orçamento' : 'Nova meta'}
         onPress={() =>
           view === 'budgets'
             ? navigation.navigate('BudgetForm', undefined)

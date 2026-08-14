@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { AccountFormScreen } from '@/screens/Settings/AccountFormScreen';
 import { AccountsListScreen } from '@/screens/Settings/AccountsListScreen';
+import { BackupScreen } from '@/screens/Settings/BackupScreen';
 import { RecurringRuleFormScreen } from '@/screens/Settings/RecurringRuleFormScreen';
 import { RecurringRulesListScreen } from '@/screens/Settings/RecurringRulesListScreen';
 import { SettingsScreen } from '@/screens/Settings/SettingsScreen';
@@ -30,6 +31,7 @@ export function SettingsStack() {
         component={RecurringRuleFormScreen}
         options={{ title: 'Recorrência' }}
       />
+      <Stack.Screen name="Backup" component={BackupScreen} options={{ title: 'Backup' }} />
     </Stack.Navigator>
   );
 }
