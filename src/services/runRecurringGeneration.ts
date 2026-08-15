@@ -49,6 +49,8 @@ export async function runRecurringGeneration(today: string): Promise<number> {
         amountCents: row.amountCents,
         date: occurrence.date,
         description: row.description,
+        recurringRuleId: row.id,
+        isRecurringGenerated: true,
       });
       generatedCount += 1;
     }

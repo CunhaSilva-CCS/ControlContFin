@@ -133,7 +133,12 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
       )}
       <SegmentedButtons
         value={type}
-        onValueChange={(value) => setType(value as 'income' | 'expense')}
+        onValueChange={(value) => {
+          setType(value as 'income' | 'expense');
+          // The category list is filtered by type (below) — a category id
+          // chosen under the old type may not belong to the new one.
+          setCategoryId(null);
+        }}
         buttons={[
           { value: 'expense', label: 'Despesa' },
           { value: 'income', label: 'Receita' },

@@ -18,6 +18,9 @@ function openAndKeyDatabase(): SQLiteDatabase {
   // check now (rather than on some arbitrary later query) so a bad key opens
   // as a clear, catchable error instead of failing unpredictably elsewhere.
   database.execSync('SELECT count(*) FROM sqlite_master;');
+  // Off by default in SQLite. Without this, `onDelete` behavior declared in
+  // schema.ts (restrict/set null/cascade) is silently not enforced.
+  database.execSync('PRAGMA foreign_keys = ON;');
   return database;
 }
 

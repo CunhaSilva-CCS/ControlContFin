@@ -1,5 +1,6 @@
 import {
   createAccount,
+  deleteAccount,
   getAccountBalanceCents,
   getAllAccountBalancesCents,
   listAccounts,
@@ -130,5 +131,41 @@ describe('accounts repository', () => {
     expect(balances.get(savings.id)).toBe(await getAccountBalanceCents(db, savings.id));
     expect(balances.get(archived.id)).toBe(await getAccountBalanceCents(db, archived.id));
     expect(balances.get(archived.id)).toBe(5000);
+  });
+
+  it('refuses to delete an account that still has transactions, instead of orphaning them', async () => {
+    const account = await createAccount(db, {
+      name: 'Principal',
+      type: 'checking',
+      initialBalanceCents: 0,
+      color: '#000000',
+      icon: 'bank',
+    });
+    await createTransaction(db, {
+      accountId: account.id,
+      type: 'income',
+      amountCents: 1000,
+      date: '2026-08-01',
+    });
+
+    await expect(deleteAccount(db, account.id)).rejects.toThrow();
+
+    const stillThere = await listAccounts(db, { includeArchived: true });
+    expect(stillThere.map((a) => a.id)).toContain(account.id);
+  });
+
+  it('allows deleting an account with no transactions referencing it', async () => {
+    const account = await createAccount(db, {
+      name: 'Sem uso',
+      type: 'checking',
+      initialBalanceCents: 0,
+      color: '#000000',
+      icon: 'bank',
+    });
+
+    await deleteAccount(db, account.id);
+
+    const remaining = await listAccounts(db, { includeArchived: true });
+    expect(remaining.map((a) => a.id)).not.toContain(account.id);
   });
 });

@@ -42,8 +42,8 @@ export const recurringRules = sqliteTable('recurring_rules', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   accountId: integer('account_id')
     .notNull()
-    .references(() => accounts.id),
-  categoryId: integer('category_id').references(() => categories.id),
+    .references(() => accounts.id, { onDelete: 'restrict' }),
+  categoryId: integer('category_id').references(() => categories.id, { onDelete: 'set null' }),
   type: text('type', { enum: transactionTypeValues }).notNull(),
   amountCents: integer('amount_cents').notNull(),
   description: text('description'),
@@ -69,14 +69,18 @@ export const transactions = sqliteTable(
     id: integer('id').primaryKey({ autoIncrement: true }),
     accountId: integer('account_id')
       .notNull()
-      .references(() => accounts.id),
-    categoryId: integer('category_id').references(() => categories.id),
+      .references(() => accounts.id, { onDelete: 'restrict' }),
+    categoryId: integer('category_id').references(() => categories.id, { onDelete: 'set null' }),
     type: text('type', { enum: transactionTypeValues }).notNull(),
-    transferAccountId: integer('transfer_account_id').references(() => accounts.id),
+    transferAccountId: integer('transfer_account_id').references(() => accounts.id, {
+      onDelete: 'restrict',
+    }),
     amountCents: integer('amount_cents').notNull(),
     date: text('date').notNull(),
     description: text('description'),
-    recurringRuleId: integer('recurring_rule_id').references(() => recurringRules.id),
+    recurringRuleId: integer('recurring_rule_id').references(() => recurringRules.id, {
+      onDelete: 'set null',
+    }),
     isRecurringGenerated: integer('is_recurring_generated', { mode: 'boolean' })
       .notNull()
       .default(false),
@@ -98,7 +102,7 @@ export const budgets = sqliteTable(
   'budgets',
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
-    categoryId: integer('category_id').references(() => categories.id),
+    categoryId: integer('category_id').references(() => categories.id, { onDelete: 'cascade' }),
     month: text('month').notNull(),
     limitCents: integer('limit_cents').notNull(),
     createdAt: text('created_at')
@@ -119,7 +123,7 @@ export const goals = sqliteTable('goals', {
   deadline: text('deadline'),
   color: text('color').notNull(),
   icon: text('icon').notNull(),
-  linkedAccountId: integer('linked_account_id').references(() => accounts.id),
+  linkedAccountId: integer('linked_account_id').references(() => accounts.id, { onDelete: 'set null' }),
   status: text('status', { enum: goalStatusValues }).notNull().default('active'),
   createdAt: text('created_at')
     .notNull()
@@ -130,8 +134,10 @@ export const goalContributions = sqliteTable('goal_contributions', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   goalId: integer('goal_id')
     .notNull()
-    .references(() => goals.id),
+    .references(() => goals.id, { onDelete: 'cascade' }),
   amountCents: integer('amount_cents').notNull(),
   date: text('date').notNull(),
-  linkedTransactionId: integer('linked_transaction_id').references(() => transactions.id),
+  linkedTransactionId: integer('linked_transaction_id').references(() => transactions.id, {
+    onDelete: 'set null',
+  }),
 });

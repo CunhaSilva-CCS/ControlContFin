@@ -19,6 +19,8 @@ export type NewTransactionInput = {
   amountCents: number;
   date: string;
   description?: string | null;
+  recurringRuleId?: number | null;
+  isRecurringGenerated?: boolean;
 };
 
 export async function createTransaction(db: AppDatabase, input: NewTransactionInput) {

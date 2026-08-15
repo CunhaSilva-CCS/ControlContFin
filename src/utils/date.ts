@@ -1,5 +1,15 @@
+/**
+ * Local calendar date as YYYY-MM-DD. Deliberately NOT `new Date().toISOString()`
+ * (that reads the UTC date) — for a UTC-3 timezone, that flips to tomorrow's
+ * date starting at 21:00 local time, which would fire recurring transactions
+ * and the "once per day" automatic backup a day early in the evening.
+ */
 export function todayISODate(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -14,7 +24,7 @@ export function formatDatePtBR(isoDate: string): string {
 }
 
 export function currentMonth(): string {
-  return new Date().toISOString().slice(0, 7);
+  return todayISODate().slice(0, 7);
 }
 
 const MONTH_LABELS_PT_BR = [

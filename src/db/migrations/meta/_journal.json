@@ -15,6 +15,13 @@
       "when": 1786756531935,
       "tag": "0001_lumpy_shotgun",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786795445963,
+      "tag": "0002_lovely_winter_soldier",
+      "breakpoints": true
     }
   ]
 }

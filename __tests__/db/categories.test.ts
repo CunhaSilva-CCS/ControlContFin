@@ -1,4 +1,13 @@
-import { createCategory, listCategories, recolorSeedDefaults, seedDefaultCategories } from '@/db/repositories/categories';
+import { createAccount } from '@/db/repositories/accounts';
+import { upsertBudget, listBudgets } from '@/db/repositories/budgets';
+import {
+  createCategory,
+  deleteCategory,
+  listCategories,
+  recolorSeedDefaults,
+  seedDefaultCategories,
+} from '@/db/repositories/categories';
+import { createTransaction, getTransaction } from '@/db/repositories/transactions';
 import { createTestDatabase } from '@/db/testClient';
 import type { AppDatabase } from '@/db/types';
 import { defaultCategories } from '@/constants/seedCategories';
@@ -57,5 +66,37 @@ describe('categories repository', () => {
     // second pass finds nothing left to recolor.
     const secondPass = await recolorSeedDefaults(db, defaultCategories);
     expect(secondPass).toBe(0);
+  });
+
+  it('deleting a category unlinks (not orphans) its transactions, and removes its budget', async () => {
+    const account = await createAccount(db, {
+      name: 'Principal',
+      type: 'checking',
+      initialBalanceCents: 0,
+      color: '#000',
+      icon: 'bank',
+    });
+    const category = await createCategory(db, {
+      name: 'Alimentação',
+      type: 'expense',
+      icon: 'food',
+      color: '#8C3A3A',
+    });
+    const transaction = await createTransaction(db, {
+      accountId: account.id,
+      categoryId: category.id,
+      type: 'expense',
+      amountCents: 1000,
+      date: '2026-08-01',
+    });
+    await upsertBudget(db, { categoryId: category.id, month: '2026-08', limitCents: 5000 });
+
+    await deleteCategory(db, category.id);
+
+    const transactionAfter = await getTransaction(db, transaction.id);
+    expect(transactionAfter?.categoryId).toBeNull();
+
+    const budgetsAfter = await listBudgets(db, '2026-08');
+    expect(budgetsAfter).toHaveLength(0);
   });
 });
