@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { Chip } from 'react-native-paper';
 
@@ -12,7 +13,11 @@ type AccountPickerProps = {
   onSelect: (id: number) => void;
 };
 
-export function AccountPicker({ accounts: accountList, selectedId, onSelect }: AccountPickerProps) {
+export const AccountPicker = memo(function AccountPicker({
+  accounts: accountList,
+  selectedId,
+  onSelect,
+}: AccountPickerProps) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.container}>
       {accountList.map((account) => (
@@ -28,7 +33,7 @@ export function AccountPicker({ accounts: accountList, selectedId, onSelect }: A
       ))}
     </ScrollView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

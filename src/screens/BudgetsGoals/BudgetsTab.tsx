@@ -1,43 +1,63 @@
+import { memo, useCallback, useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ProgressBar, Text } from 'react-native-paper';
 
 import { PlaceholderScreen } from '@/components/common/PlaceholderScreen';
 import { colors, spacing } from '@/constants/theme';
+import type { categories as categoriesTable } from '@/db/schema';
 import { useBudgets, type BudgetWithProgress } from '@/hooks/useBudgets';
 import { useCategories } from '@/hooks/useCategories';
 import { centsToBRL } from '@/utils/currency';
 import { currentMonth } from '@/utils/date';
 
+type Category = typeof categoriesTable.$inferSelect;
+
 type BudgetsTabProps = {
   onSelectBudget: (categoryId: number | null) => void;
 };
+
+type BudgetRowProps = {
+  budget: BudgetWithProgress;
+  category: Category | undefined;
+  onPress: (categoryId: number | null) => void;
+};
+
+const BudgetRow = memo(function BudgetRow({ budget, category, onPress }: BudgetRowProps) {
+  const barColor = budget.progress.isOverBudget ? colors.expense : colors.primary;
+
+  return (
+    <Pressable onPress={() => onPress(budget.categoryId)} style={styles.row}>
+      <Text variant="bodyMedium">{category?.name ?? 'Orçamento geral'}</Text>
+      <ProgressBar
+        progress={Math.min(budget.progress.percent / 100, 1)}
+        color={barColor}
+        style={styles.progressBar}
+      />
+      <Text variant="bodySmall" style={budget.progress.isOverBudget ? styles.overBudgetText : undefined}>
+        {centsToBRL(budget.progress.spentCents)} de {centsToBRL(budget.progress.limitCents)}
+        {budget.progress.isOverBudget ? ' · estourado' : ''}
+      </Text>
+    </Pressable>
+  );
+});
 
 export function BudgetsTab({ onSelectBudget }: BudgetsTabProps) {
   const month = currentMonth();
   const { budgets } = useBudgets(month);
   const { categories } = useCategories('expense');
 
-  const categoryById = new Map(categories.map((category) => [category.id, category]));
+  const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
 
-  function renderItem({ item }: { item: BudgetWithProgress }) {
-    const category = item.categoryId ? categoryById.get(item.categoryId) : undefined;
-    const barColor = item.progress.isOverBudget ? colors.expense : colors.primary;
-
-    return (
-      <Pressable onPress={() => onSelectBudget(item.categoryId)} style={styles.row}>
-        <Text variant="bodyMedium">{category?.name ?? 'Orçamento geral'}</Text>
-        <ProgressBar
-          progress={Math.min(item.progress.percent / 100, 1)}
-          color={barColor}
-          style={styles.progressBar}
-        />
-        <Text variant="bodySmall" style={item.progress.isOverBudget ? styles.overBudgetText : undefined}>
-          {centsToBRL(item.progress.spentCents)} de {centsToBRL(item.progress.limitCents)}
-          {item.progress.isOverBudget ? ' · estourado' : ''}
-        </Text>
-      </Pressable>
-    );
-  }
+  const renderItem = useCallback(
+    ({ item }: { item: BudgetWithProgress }) => (
+      <BudgetRow
+        budget={item}
+        category={item.categoryId ? categoryById.get(item.categoryId) : undefined}
+        onPress={onSelectBudget}
+      />
+    ),
+    [categoryById, onSelectBudget],
+  );
 
   return (
     <View style={styles.container}>

@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ProgressBar, Text } from 'react-native-paper';
 
@@ -10,25 +11,35 @@ type GoalsTabProps = {
   onSelectGoal: (goalId: number) => void;
 };
 
+type GoalRowProps = {
+  goal: GoalWithProgress;
+  onPress: (goalId: number) => void;
+};
+
+const GoalRow = memo(function GoalRow({ goal, onPress }: GoalRowProps) {
+  return (
+    <Pressable onPress={() => onPress(goal.id)} style={styles.row}>
+      <Text variant="bodyMedium">{goal.name}</Text>
+      <ProgressBar
+        progress={goal.progress.percent / 100}
+        color={goal.progress.isComplete ? colors.income : colors.primary}
+        style={styles.progressBar}
+      />
+      <Text variant="bodySmall">
+        {centsToBRL(goal.progress.currentCents)} de {centsToBRL(goal.progress.targetCents)}
+        {goal.progress.isComplete ? ' · concluída' : ''}
+      </Text>
+    </Pressable>
+  );
+});
+
 export function GoalsTab({ onSelectGoal }: GoalsTabProps) {
   const { goals } = useGoals();
 
-  function renderItem({ item }: { item: GoalWithProgress }) {
-    return (
-      <Pressable onPress={() => onSelectGoal(item.id)} style={styles.row}>
-        <Text variant="bodyMedium">{item.name}</Text>
-        <ProgressBar
-          progress={item.progress.percent / 100}
-          color={item.progress.isComplete ? colors.income : colors.primary}
-          style={styles.progressBar}
-        />
-        <Text variant="bodySmall">
-          {centsToBRL(item.progress.currentCents)} de {centsToBRL(item.progress.targetCents)}
-          {item.progress.isComplete ? ' · concluída' : ''}
-        </Text>
-      </Pressable>
-    );
-  }
+  const renderItem = useCallback(
+    ({ item }: { item: GoalWithProgress }) => <GoalRow goal={item} onPress={onSelectGoal} />,
+    [onSelectGoal],
+  );
 
   return (
     <View style={styles.container}>

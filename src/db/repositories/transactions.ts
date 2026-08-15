@@ -56,6 +56,7 @@ export type TransactionFilters = {
   categoryId?: number;
   startDate?: string;
   endDate?: string;
+  limit?: number;
 };
 
 export async function listTransactions(db: AppDatabase, filters: TransactionFilters = {}) {
@@ -73,10 +74,13 @@ export async function listTransactions(db: AppDatabase, filters: TransactionFilt
     conditions.push(lte(transactions.date, filters.endDate));
   }
 
-  const query = db.select().from(transactions).orderBy(desc(transactions.date), desc(transactions.id));
+  const query = db
+    .select()
+    .from(transactions)
+    .orderBy(desc(transactions.date), desc(transactions.id))
+    .$dynamic();
 
-  if (conditions.length === 0) {
-    return query;
-  }
-  return query.where(and(...conditions));
+  const filtered = conditions.length === 0 ? query : query.where(and(...conditions));
+
+  return filters.limit !== undefined ? filtered.limit(filters.limit) : filtered;
 }

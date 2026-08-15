@@ -1,35 +1,25 @@
 import { db } from '@/db/client';
-import { getAccountBalanceCents, listAccounts } from '@/db/repositories/accounts';
+import { getAllAccountBalancesCents } from '@/db/repositories/accounts';
 import { useDataStore } from '@/store/dataStore';
 
 import { useAsyncQuery } from './useAsyncQuery';
 
-export function useAccountBalance(accountId: number) {
+const EMPTY_BALANCES = new Map<number, number>();
+
+/**
+ * Balances for every account, fetched in one batch (two grouped queries
+ * total, see `getAllAccountBalancesCents`) instead of one query per account
+ * — callers needing several accounts' balances (or the total) should read
+ * from this single map rather than each computing its own balance.
+ */
+export function useAccountBalances() {
   const accountsVersion = useDataStore((state) => state.version.accounts);
   const transactionsVersion = useDataStore((state) => state.version.transactions);
   const { data, loading, error } = useAsyncQuery(
-    () => getAccountBalanceCents(db, accountId),
-    [accountId, accountsVersion, transactionsVersion],
-    0,
-  );
-
-  return { balanceCents: data, loading, error };
-}
-
-export function useTotalBalance() {
-  const accountsVersion = useDataStore((state) => state.version.accounts);
-  const transactionsVersion = useDataStore((state) => state.version.transactions);
-  const { data, loading, error } = useAsyncQuery(
-    async () => {
-      const accountsList = await listAccounts(db);
-      const balances = await Promise.all(
-        accountsList.map((account) => getAccountBalanceCents(db, account.id)),
-      );
-      return balances.reduce((sum, cents) => sum + cents, 0);
-    },
+    () => getAllAccountBalancesCents(db),
     [accountsVersion, transactionsVersion],
-    0,
+    EMPTY_BALANCES,
   );
 
-  return { totalCents: data, loading, error };
+  return { balances: data, loading, error };
 }

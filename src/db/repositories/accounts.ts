@@ -56,26 +56,70 @@ export async function getAccountBalanceCents(db: AppDatabase, accountId: number)
     return 0;
   }
 
-  const [netOwnTransactions] = await db
+  const [movement] = await db
     .select({
-      total: sql<number>`coalesce(sum(case when ${transactions.type} = 'income' then ${transactions.amountCents}
+      total: sql<number>`coalesce(sum(case
+        when ${transactions.accountId} = ${accountId} and ${transactions.type} = 'income' then ${transactions.amountCents}
+        when ${transactions.accountId} = ${accountId} and ${transactions.type} = 'expense' then -${transactions.amountCents}
+        when ${transactions.accountId} = ${accountId} and ${transactions.type} = 'transfer' then -${transactions.amountCents}
+        when ${transactions.transferAccountId} = ${accountId} and ${transactions.type} = 'transfer' then ${transactions.amountCents}
+        else 0 end), 0)`,
+    })
+    .from(transactions)
+    .where(
+      sql`${transactions.accountId} = ${accountId} or (${transactions.transferAccountId} = ${accountId} and ${transactions.type} = 'transfer')`,
+    );
+
+  return account.initialBalanceCents + (movement?.total ?? 0);
+}
+
+/**
+ * Balances for every account in two grouped queries total, instead of one
+ * call to `getAccountBalanceCents` per account — avoids re-scanning
+ * `transactions` once per account when the caller needs all balances at
+ * once (dashboard total, account list).
+ */
+export async function getAllAccountBalancesCents(
+  db: AppDatabase,
+): Promise<Map<number, number>> {
+  const accountsList = await listAccounts(db, { includeArchived: true });
+
+  const ownMovementRows = await db
+    .select({
+      accountId: transactions.accountId,
+      total: sql<number>`coalesce(sum(case
+        when ${transactions.type} = 'income' then ${transactions.amountCents}
         when ${transactions.type} = 'expense' then -${transactions.amountCents}
         when ${transactions.type} = 'transfer' then -${transactions.amountCents}
         else 0 end), 0)`,
     })
     .from(transactions)
-    .where(eq(transactions.accountId, accountId));
+    .groupBy(transactions.accountId);
 
-  const [incomingTransfers] = await db
+  const incomingTransferRows = await db
     .select({
+      accountId: transactions.transferAccountId,
       total: sql<number>`coalesce(sum(${transactions.amountCents}), 0)`,
     })
     .from(transactions)
-    .where(
-      sql`${transactions.transferAccountId} = ${accountId} and ${transactions.type} = 'transfer'`,
-    );
+    .where(eq(transactions.type, 'transfer'))
+    .groupBy(transactions.transferAccountId);
 
-  return (
-    account.initialBalanceCents + (netOwnTransactions?.total ?? 0) + (incomingTransfers?.total ?? 0)
+  const movementByAccountId = new Map<number, number>();
+  for (const row of ownMovementRows) {
+    movementByAccountId.set(row.accountId, (movementByAccountId.get(row.accountId) ?? 0) + row.total);
+  }
+  for (const row of incomingTransferRows) {
+    if (row.accountId === null) {
+      continue;
+    }
+    movementByAccountId.set(row.accountId, (movementByAccountId.get(row.accountId) ?? 0) + row.total);
+  }
+
+  return new Map(
+    accountsList.map((account) => [
+      account.id,
+      account.initialBalanceCents + (movementByAccountId.get(account.id) ?? 0),
+    ]),
   );
 }
