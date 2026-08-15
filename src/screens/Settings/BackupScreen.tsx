@@ -63,7 +63,7 @@ export function BackupScreen() {
 
     const snapshot = await buildBackupSnapshot(db);
     const envelope = await encryptBackupWithPassword(JSON.stringify(snapshot), exportPassword);
-    await writeAndShareFile('controlcontfin-backup.json', envelope, 'application/json');
+    await writeAndShareFile('financas-facil-backup.json', envelope, 'application/json');
     closeExportDialog();
   }
 

@@ -1,4 +1,4 @@
-# Textos de ficha de loja — ControlContFin
+# Textos de ficha de loja — Finanças Fácil
 
 Textos prontos para colar diretamente no Google Play Console e na App Store Connect. Revise os
 campos entre `[colchetes]` antes de publicar.
@@ -19,7 +19,7 @@ Controle financeiro pessoal 100% offline, seguro e sem anúncios.
 ### Descrição completa (máx. 4000 caracteres)
 
 ```
-ControlContFin é o seu controle financeiro pessoal — simples, elegante e 100% no seu aparelho.
+Finanças Fácil é o seu controle financeiro pessoal — simples, elegante e 100% no seu aparelho.
 
 Nenhum dado sai do seu celular. Sem servidores, sem contas, sem anúncios, sem coleta de dados.
 Tudo fica salvo localmente, protegido por criptografia.
@@ -52,7 +52,7 @@ Ideal para quem quer organizar as finanças pessoais sem abrir mão da privacida
 
 O formulário do Play Console pergunta, categoria por categoria (localização, informações
 financeiras, mensagens, etc.), se o app **coleta** e/ou **compartilha** aquele tipo de dado. Como
-o ControlContFin não transmite nenhum dado para fora do aparelho, a resposta recomendada é a
+o Finanças Fácil não transmite nenhum dado para fora do aparelho, a resposta recomendada é a
 mesma em todas as categorias:
 
 - **"Este app coleta ou compartilha algum dos tipos de dados do usuário?"** → **Não**.
@@ -86,7 +86,7 @@ Controle total das suas finanças, 100% no seu aparelho. Sem contas, sem anúnci
 ### Descrição completa (máx. 4000 caracteres)
 
 ```
-ControlContFin é o seu controle financeiro pessoal — simples, elegante e totalmente privado.
+Finanças Fácil é o seu controle financeiro pessoal — simples, elegante e totalmente privado.
 
 Todos os seus dados ficam apenas no seu iPhone, protegidos por criptografia. Não existe servidor,
 conta de usuário ou coleta de dados de nenhum tipo.

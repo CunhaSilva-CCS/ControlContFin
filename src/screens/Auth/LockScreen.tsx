@@ -40,7 +40,7 @@ export function LockScreen() {
   const isLockedOut = lockedUntilMs !== null && now < lockedUntilMs;
 
   async function requestBiometrics() {
-    const success = await authenticateWithBiometrics('Confirme sua identidade para abrir o ControlContFin');
+    const success = await authenticateWithBiometrics('Confirme sua identidade para abrir o Finanças Fácil');
     if (success) {
       setStatus('unlocked');
     } else {
