@@ -144,6 +144,15 @@ antes de submeter de verdade à App Store / Play Store.
 - `eas.json` com perfis `development`/`preview`/`production`, e `production` já excluindo o
   `expo-dev-client` do binário final (ver [Segurança](#segurança)).
 - CI (`.github/workflows/ci.yml`) rodando typecheck, lint e testes em todo push/PR.
+- **Textos de política de privacidade e termos de uso** já redigidos, em
+  `docs/legal/politica-de-privacidade.html` e `docs/legal/termos-de-uso.html` — páginas HTML
+  autocontidas, prontas para hospedar em qualquer host estático (GitHub Pages, Netlify, etc.).
+  São um rascunho gerado como ponto de partida; **recomenda-se revisão por um advogado** antes de
+  publicar, e é preciso preencher os campos marcados como pendentes nos próprios arquivos (e-mail
+  de suporte, razão social, comarca).
+- **Textos de ficha de loja** já redigidos, em `docs/loja/textos-ficha-de-loja.md` — descrições,
+  palavras-chave e o preenchimento recomendado das seções de privacidade do Play Console e da App
+  Store Connect, prontos para colar direto nas fichas.
 
 > ⚠️ **Sobre o `bundleIdentifier`/`package`**: o valor usado (`com.cunhasilva.controlcontfin`) é
 > um placeholder razoável, mas **confirme ou troque antes da primeira submissão** — depois que um
@@ -158,9 +167,9 @@ antes de submeter de verdade à App Store / Play Store.
 - **Arte final do ícone e splash**: `assets/icon.png` hoje é o ícone genérico padrão do template
   do Expo (não é uma marca própria) — precisa ser substituído por artwork real antes de submeter.
   O mesmo vale para revisar se `assets/splash-icon.png` reflete a identidade visual desejada.
-- **Política de privacidade**: uma página hospedada publicamente com o texto da política — ambas
-  as lojas exigem esse link na ficha do app, mesmo sendo um app 100% local, por causa do uso de
-  biometria e notificações.
+- **Hospedar a política de privacidade**: o texto já está pronto (veja acima), mas ainda precisa
+  ser publicado em algum host público — ambas as lojas exigem esse link na ficha do app, mesmo
+  sendo um app 100% local, por causa do uso de biometria e notificações.
 - **Teste em dispositivo/simulador real**: nada neste projeto foi validado num aparelho de
   verdade neste ambiente de desenvolvimento (sem simulador/dispositivo físico disponível aqui) —
   veja as instruções em [Rodando o projeto](#rodando-o-projeto) para gerar um Dev Client e testar
