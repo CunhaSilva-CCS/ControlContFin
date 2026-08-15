@@ -6,7 +6,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 
 import { TransactionRow, type TransactionRowData } from '@/components/transactions/TransactionRow';
-import { colors, spacing } from '@/constants/theme';
+import { colors, fontFamily, spacing } from '@/constants/theme';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useAccountBalances } from '@/hooks/useAccountBalance';
 import { useCategories } from '@/hooks/useCategories';
@@ -64,12 +64,14 @@ export function DashboardScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Card style={styles.balanceCard}>
+      <Card style={styles.balanceCard} mode="contained">
         <Card.Content>
           <Text variant="titleMedium" style={styles.balanceLabel}>
             Saldo total
           </Text>
-          <Text variant="displaySmall">{centsToBRL(totalCents)}</Text>
+          <Text variant="displaySmall" style={styles.balanceAmount}>
+            {centsToBRL(totalCents)}
+          </Text>
         </Card.Content>
       </Card>
 
@@ -119,9 +121,18 @@ const styles = StyleSheet.create({
   },
   balanceCard: {
     marginBottom: spacing.sm,
+    backgroundColor: colors.primary,
+    borderWidth: 1,
+    borderColor: colors.accent,
   },
   balanceLabel: {
-    color: colors.textSecondary,
+    color: colors.surface,
+    opacity: 0.8,
+  },
+  balanceAmount: {
+    color: colors.surface,
+    fontFamily: fontFamily.serif,
+    marginTop: spacing.xs,
   },
   accountRow: {
     flexDirection: 'row',

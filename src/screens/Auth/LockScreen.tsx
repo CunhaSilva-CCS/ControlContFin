@@ -1,10 +1,10 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Card, Text } from 'react-native-paper';
 
 import { PinPad } from '@/components/auth/PinPad';
-import { colors, spacing } from '@/constants/theme';
+import { colors, fontFamily, spacing } from '@/constants/theme';
 import { resetAppLock, verifyPinAttempt } from '@/services/auth/authService';
 import { authenticateWithBiometrics } from '@/services/auth/biometricAuth';
 import { PIN_LENGTH } from '@/services/auth/pinPolicy';
@@ -109,35 +109,43 @@ export function LockScreen() {
 
   return (
     <View style={styles.container}>
-      <MaterialCommunityIcons name="lock" size={40} color={colors.primary} style={styles.icon} />
-      <Text variant="headlineSmall" style={styles.title}>
-        Digite seu PIN
-      </Text>
+      <Card style={styles.card} mode="contained">
+        <Card.Content style={styles.cardContent}>
+          <View style={styles.iconBadge}>
+            <MaterialCommunityIcons name="lock" size={32} color={colors.accent} />
+          </View>
+          <Text variant="headlineSmall" style={styles.title}>
+            Digite seu PIN
+          </Text>
 
-      {error && (
-        <Text variant="bodyMedium" style={styles.error}>
-          {error}
-        </Text>
-      )}
-      {isLockedOut && (
-        <Text variant="bodyMedium" style={styles.error}>
-          Bloqueado por mais {formatRemaining(lockedUntilMs - now)}.
-        </Text>
-      )}
+          {error && (
+            <Text variant="bodyMedium" style={styles.error}>
+              {error}
+            </Text>
+          )}
+          {isLockedOut && (
+            <Text variant="bodyMedium" style={styles.error}>
+              Bloqueado por mais {formatRemaining(lockedUntilMs - now)}.
+            </Text>
+          )}
 
-      <PinPad value={pin} onChange={handlePinChange} />
+          <PinPad value={pin} onChange={handlePinChange} />
 
-      {biometricEnabled && !isLockedOut && (
-        <Pressable
-          onPress={requestBiometrics}
-          style={styles.biometricButton}
-          accessibilityRole="button"
-          accessibilityLabel="Usar biometria"
-        >
-          <MaterialCommunityIcons name="fingerprint" size={28} color={colors.primary} />
-          <Text variant="bodyMedium">Usar biometria</Text>
-        </Pressable>
-      )}
+          {biometricEnabled && !isLockedOut && (
+            <Pressable
+              onPress={requestBiometrics}
+              style={styles.biometricButton}
+              accessibilityRole="button"
+              accessibilityLabel="Usar biometria"
+            >
+              <MaterialCommunityIcons name="fingerprint" size={28} color={colors.surface} />
+              <Text variant="bodyMedium" style={styles.biometricLabel}>
+                Usar biometria
+              </Text>
+            </Pressable>
+          )}
+        </Card.Content>
+      </Card>
 
       <Pressable onPress={handleForgotPin} accessibilityRole="button">
         <Text variant="bodySmall" style={styles.forgotPin}>
@@ -154,14 +162,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.lg,
-    gap: spacing.md,
-    backgroundColor: colors.background,
+    gap: spacing.lg,
+    backgroundColor: colors.primary,
   },
-  icon: {
-    marginBottom: spacing.sm,
+  card: {
+    width: '100%',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
+  cardContent: {
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.lg,
+  },
+  iconBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
   },
   title: {
     textAlign: 'center',
+    fontFamily: fontFamily.serifSemiBold,
   },
   error: {
     textAlign: 'center',
@@ -171,10 +196,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
     marginTop: spacing.md,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 24,
+  },
+  biometricLabel: {
+    color: colors.surface,
   },
   forgotPin: {
-    color: colors.textSecondary,
-    marginTop: spacing.lg,
+    color: colors.surface,
     textDecorationLine: 'underline',
   },
 });

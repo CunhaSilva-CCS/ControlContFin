@@ -5,13 +5,14 @@ import { BudgetsGoalsScreen } from '@/screens/BudgetsGoals/BudgetsGoalsScreen';
 import { GoalContributeScreen } from '@/screens/BudgetsGoals/GoalContributeScreen';
 import { GoalFormScreen } from '@/screens/BudgetsGoals/GoalFormScreen';
 
+import { stackScreenOptions } from '../navigationTheme';
 import type { BudgetsGoalsStackParamList } from '../types';
 
 const Stack = createNativeStackNavigator<BudgetsGoalsStackParamList>();
 
 export function BudgetsGoalsStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={stackScreenOptions}>
       <Stack.Screen
         name="BudgetsGoalsHome"
         component={BudgetsGoalsScreen}

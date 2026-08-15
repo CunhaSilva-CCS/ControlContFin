@@ -1,5 +1,11 @@
+import {
+  PlayfairDisplay_600SemiBold,
+  PlayfairDisplay_700Bold,
+  useFonts,
+} from '@expo-google-fonts/playfair-display';
 import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, PaperProvider, Text } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -12,7 +18,7 @@ import { defaultCategories } from '@/constants/seedCategories';
 import { colors, paperTheme, spacing } from '@/constants/theme';
 import { db, dbOpenError, resetDatabaseAfterOpenFailure } from '@/db/client';
 import { useDatabaseMigrations } from '@/db/migrationsHook';
-import { seedDefaultCategories } from '@/db/repositories/categories';
+import { recolorSeedDefaults, seedDefaultCategories } from '@/db/repositories/categories';
 import { useAppSwitcherPrivacy } from '@/hooks/useAppSwitcherPrivacy';
 import { useAutoLock } from '@/hooks/useAutoLock';
 import { useAutomaticBackup } from '@/hooks/useAutomaticBackup';
@@ -22,6 +28,11 @@ import { getAuthSettings, isAppLockConfigured } from '@/services/auth/authServic
 import { registerRecurringBackgroundTask } from '@/services/backgroundTask';
 import { ensureNotificationSetup } from '@/services/notifications';
 import { useAuthStore } from '@/store/authStore';
+
+// Runs at import time, before React mounts — keeps the native splash screen
+// up until fonts finish loading, so the Playfair Display headline/balance
+// text doesn't flash from the system font to the serif font on first paint.
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function DatabaseRecoveryScreen() {
   const [resetting, setResetting] = useState(false);
@@ -73,6 +84,7 @@ function AppShell() {
       return;
     }
     seedDefaultCategories(db, defaultCategories)
+      .then(() => recolorSeedDefaults(db, defaultCategories))
       .then(() => setSeeded(true))
       .catch(() => setSeedError('Não foi possível preparar os dados iniciais do app.'));
     ensureNotificationSetup().catch((err: unknown) =>
@@ -114,10 +126,20 @@ function AppShell() {
 }
 
 export default function App() {
+  const [fontsLoaded, fontError] = useFonts({
+    PlayfairDisplay_600SemiBold,
+    PlayfairDisplay_700Bold,
+  });
   const authStatus = useAutoLock();
   const hideFromAppSwitcher = useAppSwitcherPrivacy();
   const setStatus = useAuthStore((state) => state.setStatus);
   const setSettings = useAuthStore((state) => state.setSettings);
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded, fontError]);
 
   useEffect(() => {
     isAppLockConfigured()
@@ -135,6 +157,10 @@ export default function App() {
       .catch((err: unknown) => console.error('Falha ao verificar configuração de bloqueio', err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
 
   return (
     <SafeAreaProvider>

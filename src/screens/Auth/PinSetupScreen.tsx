@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { Button, Card, Text } from 'react-native-paper';
 
 import { PinPad } from '@/components/auth/PinPad';
-import { colors, spacing } from '@/constants/theme';
+import { colors, fontFamily, spacing } from '@/constants/theme';
 import { DEFAULT_AUTO_LOCK_MINUTES, setBiometricEnabled, setupPin } from '@/services/auth/authService';
 import { isBiometricAvailable } from '@/services/auth/biometricAuth';
 import { PIN_LENGTH } from '@/services/auth/pinPolicy';
@@ -90,46 +90,54 @@ export function PinSetupScreen() {
   if (step === 'biometric') {
     return (
       <View style={styles.container}>
-        <Text variant="headlineSmall" style={styles.title}>
-          Usar biometria também?
-        </Text>
-        <Text variant="bodyMedium" style={styles.subtitle}>
-          Com a autenticação em duas etapas ativada, além do PIN você também vai precisar
-          confirmar sua digital ou reconhecimento facial para abrir o app.
-        </Text>
-        {biometricError && (
-          <Text variant="bodyMedium" style={styles.error}>
-            {biometricError}
-          </Text>
-        )}
-        {!biometricError && (
-          <Button mode="contained" style={styles.actionButton} onPress={() => handleEnableBiometric(true)}>
-            Ativar biometria (recomendado)
-          </Button>
-        )}
-        <Button mode="outlined" onPress={() => finishSetup(false)}>
-          {biometricError ? 'Continuar sem biometria' : 'Usar apenas PIN'}
-        </Button>
+        <Card style={styles.card} mode="contained">
+          <Card.Content style={styles.cardContent}>
+            <Text variant="headlineSmall" style={styles.title}>
+              Usar biometria também?
+            </Text>
+            <Text variant="bodyMedium" style={styles.subtitle}>
+              Com a autenticação em duas etapas ativada, além do PIN você também vai precisar
+              confirmar sua digital ou reconhecimento facial para abrir o app.
+            </Text>
+            {biometricError && (
+              <Text variant="bodyMedium" style={styles.error}>
+                {biometricError}
+              </Text>
+            )}
+            {!biometricError && (
+              <Button mode="contained" style={styles.actionButton} onPress={() => handleEnableBiometric(true)}>
+                Ativar biometria (recomendado)
+              </Button>
+            )}
+            <Button mode="outlined" onPress={() => finishSetup(false)}>
+              {biometricError ? 'Continuar sem biometria' : 'Usar apenas PIN'}
+            </Button>
+          </Card.Content>
+        </Card>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text variant="headlineSmall" style={styles.title}>
-        {step === 'create' ? 'Crie um PIN' : 'Confirme o PIN'}
-      </Text>
-      <Text variant="bodyMedium" style={styles.subtitle}>
-        {step === 'create'
-          ? 'Esse PIN protege o acesso aos seus dados financeiros neste aparelho.'
-          : 'Digite o mesmo PIN novamente.'}
-      </Text>
-      {error && (
-        <Text variant="bodyMedium" style={styles.error}>
-          {error}
-        </Text>
-      )}
-      <PinPad value={pin} onChange={handlePinChange} />
+      <Card style={styles.card} mode="contained">
+        <Card.Content style={styles.cardContent}>
+          <Text variant="headlineSmall" style={styles.title}>
+            {step === 'create' ? 'Crie um PIN' : 'Confirme o PIN'}
+          </Text>
+          <Text variant="bodyMedium" style={styles.subtitle}>
+            {step === 'create'
+              ? 'Esse PIN protege o acesso aos seus dados financeiros neste aparelho.'
+              : 'Digite o mesmo PIN novamente.'}
+          </Text>
+          {error && (
+            <Text variant="bodyMedium" style={styles.error}>
+              {error}
+            </Text>
+          )}
+          <PinPad value={pin} onChange={handlePinChange} />
+        </Card.Content>
+      </Card>
     </View>
   );
 }
@@ -139,16 +147,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: spacing.lg,
+    backgroundColor: colors.primary,
+  },
+  card: {
+    width: '100%',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
+  cardContent: {
+    alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.background,
+    paddingVertical: spacing.lg,
   },
   title: {
     textAlign: 'center',
+    fontFamily: fontFamily.serifSemiBold,
   },
   subtitle: {
     textAlign: 'center',
     color: colors.textSecondary,
-    marginBottom: spacing.md,
   },
   error: {
     textAlign: 'center',
@@ -156,5 +174,6 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginBottom: spacing.sm,
+    width: '100%',
   },
 });

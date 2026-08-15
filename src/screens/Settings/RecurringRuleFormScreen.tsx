@@ -192,7 +192,7 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
       </Button>
 
       {isEditing && (
-        <Button mode="outlined" textColor="#C62828" onPress={handleDelete}>
+        <Button mode="outlined" textColor={colors.expense} onPress={handleDelete}>
           Excluir
         </Button>
       )}

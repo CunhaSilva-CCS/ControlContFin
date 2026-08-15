@@ -4,13 +4,14 @@ import { TransactionDetailScreen } from '@/screens/Transactions/TransactionDetai
 import { TransactionFormScreen } from '@/screens/Transactions/TransactionFormScreen';
 import { TransactionsListScreen } from '@/screens/Transactions/TransactionsListScreen';
 
+import { stackScreenOptions } from '../navigationTheme';
 import type { TransactionsStackParamList } from '../types';
 
 const Stack = createNativeStackNavigator<TransactionsStackParamList>();
 
 export function TransactionsStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={stackScreenOptions}>
       <Stack.Screen
         name="TransactionsList"
         component={TransactionsListScreen}
