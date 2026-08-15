@@ -50,7 +50,6 @@ export const recurringRules = sqliteTable('recurring_rules', {
   frequency: text('frequency', { enum: recurringFrequencyValues }).notNull(),
   interval: integer('interval').notNull().default(1),
   dayOfMonth: integer('day_of_month'),
-  weekday: integer('weekday'),
   startDate: text('start_date').notNull(),
   endDate: text('end_date'),
   nextRunDate: text('next_run_date').notNull(),

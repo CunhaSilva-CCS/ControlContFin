@@ -22,7 +22,7 @@ export type NewRecurringRuleInput = {
 
 export async function createRecurringRule(db: AppDatabase, input: NewRecurringRuleInput) {
   const [row] = await db.insert(recurringRules).values(input).returning();
-  useDataStore.getState().bump('transactions');
+  useDataStore.getState().bump('recurringRules');
   return row;
 }
 
@@ -40,13 +40,13 @@ export async function updateRecurringRule(
     .set(input)
     .where(eq(recurringRules.id, id))
     .returning();
-  useDataStore.getState().bump('transactions');
+  useDataStore.getState().bump('recurringRules');
   return row;
 }
 
 export async function deleteRecurringRule(db: AppDatabase, id: number) {
   await db.delete(recurringRules).where(eq(recurringRules.id, id));
-  useDataStore.getState().bump('transactions');
+  useDataStore.getState().bump('recurringRules');
 }
 
 export async function listRecurringRules(db: AppDatabase, { includeInactive = false } = {}) {

@@ -16,6 +16,8 @@ export type TransactionRowData = {
   categoryName: string | null;
   categoryIcon: string | null;
   categoryColor: string | null;
+  accountName: string | null;
+  transferAccountName: string | null;
 };
 
 type TransactionRowProps = {
@@ -33,10 +35,16 @@ export const TransactionRow = memo(function TransactionRow({ transaction, onPres
         ? colors.expense
         : colors.textPrimary;
   const sign = transaction.type === 'income' ? '+' : transaction.type === 'expense' ? '-' : '';
+  const isTransfer = transaction.type === 'transfer';
+  const primaryText =
+    transaction.description ||
+    (isTransfer ? `Transferência para ${transaction.transferAccountName ?? '...'}` : transaction.categoryName) ||
+    'Transação';
+  const subtitleText = isTransfer
+    ? `${transaction.accountName ?? '...'} → ${transaction.transferAccountName ?? '...'}`
+    : (transaction.categoryName ?? 'Sem categoria');
 
-  const label = `${transaction.description || transaction.categoryName || 'Transação'}, ${sign}${centsToBRL(
-    transaction.amountCents,
-  )}, ${formatDatePtBR(transaction.date)}`;
+  const label = `${primaryText}, ${sign}${centsToBRL(transaction.amountCents)}, ${formatDatePtBR(transaction.date)}`;
 
   function handlePress() {
     onPress(transaction.id);
@@ -57,9 +65,9 @@ export const TransactionRow = memo(function TransactionRow({ transaction, onPres
         />
       </View>
       <View style={styles.info}>
-        <Text variant="bodyMedium">{transaction.description || transaction.categoryName || 'Transação'}</Text>
+        <Text variant="bodyMedium">{primaryText}</Text>
         <Text variant="bodySmall" style={styles.subtitle}>
-          {transaction.categoryName ?? 'Sem categoria'} · {formatDatePtBR(transaction.date)}
+          {subtitleText} · {formatDatePtBR(transaction.date)}
         </Text>
       </View>
       <Text variant="bodyMedium" style={{ color: amountColor }}>

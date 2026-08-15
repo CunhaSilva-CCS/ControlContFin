@@ -27,7 +27,10 @@ export async function updateCategory(db: AppDatabase, id: number, input: Partial
 
 export async function deleteCategory(db: AppDatabase, id: number) {
   await db.delete(categories).where(eq(categories.id, id));
+  // Cascades to delete any budget referencing this category (FK onDelete:
+  // 'cascade' on budgets.categoryId), so budgets readers need to re-query too.
   useDataStore.getState().bump('categories');
+  useDataStore.getState().bump('budgets');
 }
 
 export async function listCategories(db: AppDatabase, type?: CategoryType) {

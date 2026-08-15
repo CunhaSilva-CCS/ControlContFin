@@ -36,7 +36,7 @@ export function BudgetFormScreen({ route, navigation }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const canSave = isOverall ? true : categoryId !== null;
+  const canSave = (isOverall ? true : categoryId !== null) && limitCents > 0;
 
   async function handleSave() {
     if (!canSave) {

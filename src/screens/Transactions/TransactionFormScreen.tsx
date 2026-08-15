@@ -25,6 +25,7 @@ export function TransactionFormScreen({ route, navigation }: Props) {
   const [type, setType] = useState<TransactionType>('expense');
   const [accountId, setAccountId] = useState<number | null>(null);
   const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [transferAccountId, setTransferAccountId] = useState<number | null>(null);
   const [amountCents, setAmountCents] = useState(0);
   const [date, setDate] = useState(todayISODate());
   const [description, setDescription] = useState('');
@@ -50,6 +51,7 @@ export function TransactionFormScreen({ route, navigation }: Props) {
           setType(existing.type);
           setAccountId(existing.accountId);
           setCategoryId(existing.categoryId);
+          setTransferAccountId(existing.transferAccountId);
           setAmountCents(existing.amountCents);
           setDate(existing.date);
           setDescription(existing.description ?? '');
@@ -62,7 +64,10 @@ export function TransactionFormScreen({ route, navigation }: Props) {
       });
   }, [isEditing, transactionId]);
 
-  const canSave = accountId !== null && amountCents > 0;
+  const canSave =
+    accountId !== null &&
+    amountCents > 0 &&
+    (type !== 'transfer' || (transferAccountId !== null && transferAccountId !== accountId));
 
   async function handleSave() {
     if (!canSave || accountId === null) {
@@ -70,8 +75,9 @@ export function TransactionFormScreen({ route, navigation }: Props) {
     }
     const input = {
       accountId,
-      categoryId,
+      categoryId: type === 'transfer' ? null : categoryId,
       type,
+      transferAccountId: type === 'transfer' ? transferAccountId : null,
       amountCents,
       date,
       description: description || null,
@@ -102,10 +108,12 @@ export function TransactionFormScreen({ route, navigation }: Props) {
           // The category list is filtered by type (line 35) — a category id
           // chosen under the old type may not belong to the new one.
           setCategoryId(null);
+          setTransferAccountId(null);
         }}
         buttons={[
           { value: 'expense', label: 'Despesa' },
           { value: 'income', label: 'Receita' },
+          { value: 'transfer', label: 'Transferência' },
         ]}
       />
 
@@ -124,9 +132,19 @@ export function TransactionFormScreen({ route, navigation }: Props) {
         <AccountPicker accounts={accounts} selectedId={accountId} onSelect={setAccountId} />
       </View>
 
-      <View style={styles.section}>
-        <CategoryPicker categories={categories} selectedId={categoryId} onSelect={setCategoryId} />
-      </View>
+      {type === 'transfer' ? (
+        <View style={styles.section}>
+          <AccountPicker
+            accounts={accounts.filter((account) => account.id !== accountId)}
+            selectedId={transferAccountId}
+            onSelect={setTransferAccountId}
+          />
+        </View>
+      ) : (
+        <View style={styles.section}>
+          <CategoryPicker categories={categories} selectedId={categoryId} onSelect={setCategoryId} />
+        </View>
+      )}
 
       <Button mode="contained" onPress={handleSave} disabled={!canSave} style={styles.saveButton}>
         Salvar

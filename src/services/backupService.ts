@@ -146,6 +146,7 @@ export async function restoreBackupSnapshot(db: AppDatabase, snapshot: BackupSna
   bump('transactions');
   bump('budgets');
   bump('goals');
+  bump('recurringRules');
 }
 
 function backupsDirectory(): Directory {

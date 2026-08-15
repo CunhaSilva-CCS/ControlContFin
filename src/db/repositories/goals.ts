@@ -50,17 +50,23 @@ export async function contributeToGoal(
   amountCents: number,
   date: string,
 ) {
-  await db.insert(goalContributions).values({ goalId, amountCents, date });
+  const [updated] = db.transaction((tx) => {
+    tx.insert(goalContributions).values({ goalId, amountCents, date }).run();
 
-  const [updated] = await db
-    .update(goals)
-    .set({ currentCents: sql`${goals.currentCents} + ${amountCents}` })
-    .where(eq(goals.id, goalId))
-    .returning();
+    const rows = tx
+      .update(goals)
+      .set({ currentCents: sql`${goals.currentCents} + ${amountCents}` })
+      .where(eq(goals.id, goalId))
+      .returning()
+      .all();
 
-  if (updated && updated.currentCents >= updated.targetCents && updated.status === 'active') {
-    await db.update(goals).set({ status: 'completed' }).where(eq(goals.id, goalId));
-  }
+    const [row] = rows;
+    if (row && row.currentCents >= row.targetCents && row.status === 'active') {
+      tx.update(goals).set({ status: 'completed' }).where(eq(goals.id, goalId)).run();
+    }
+
+    return rows;
+  });
 
   useDataStore.getState().bump('goals');
   return updated;

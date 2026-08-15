@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Política de Privacidade — ControlContFin</title>
+<style>
+  :root {
+    --bg: #FAF6EF;
+    --surface: #FFFFFF;
+    --text: #1C2530;
+    --text-secondary: #5B6773;
+    --primary: #14293D;
+    --accent: #B08D57;
+    --border: #E4DECF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  header {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+  }
+  h1 {
+    font-size: 1.9rem;
+    color: var(--primary);
+    margin: 0 0 8px;
+  }
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+  .draft-notice {
+    background: #FFF7E8;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    font-size: 0.92rem;
+    color: var(--text);
+  }
+  .draft-notice strong { color: var(--primary); }
+  h2 {
+    font-size: 1.25rem;
+    color: var(--primary);
+    margin-top: 40px;
+    border-left: 4px solid var(--accent);
+    padding-left: 12px;
+  }
+  h3 {
+    font-size: 1.05rem;
+    color: var(--primary);
+    margin-top: 24px;
+  }
+  p, li { color: var(--text); }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .placeholder {
+    background: #FFF3F3;
+    color: #8C3A3A;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+  a { color: var(--primary); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="draft-notice">
+    <strong>Aviso:</strong> este texto é um modelo/rascunho gerado como ponto de partida para a
+    política de privacidade do aplicativo ControlContFin. Recomenda-se revisão por um advogado
+    antes da publicação, especialmente por se tratar de um aplicativo de controle financeiro
+    pessoal. Substitua os campos marcados em <span class="placeholder">destaque</span> pelos dados
+    corretos antes de hospedar esta página.
+  </div>
+
+  <header>
+    <h1>Política de Privacidade — ControlContFin</h1>
+    <div class="subtitle">Última atualização: <span class="placeholder">[data de publicação]</span></div>
+  </header>
+
+  <p>
+    O ControlContFin é um aplicativo de controle financeiro pessoal para iOS e Android. Esta
+    Política de Privacidade explica, de forma direta, como o aplicativo trata os dados do usuário.
+  </p>
+
+  <div class="card">
+    <strong>Resumo em uma frase:</strong> o ControlContFin não coleta, não transmite e não
+    armazena nenhum dado do usuário em servidores — tudo fica apenas no aparelho do próprio
+    usuário, dentro de um banco de dados criptografado.
+  </div>
+
+  <h2>1. Quais dados o aplicativo trata</h2>
+  <p>O aplicativo trabalha com dados financeiros que o próprio usuário insere manualmente: contas,
+  transações, categorias, orçamentos e metas. Todos esses dados:</p>
+  <ul>
+    <li>São armazenados <strong>exclusivamente no aparelho do usuário</strong>, num banco de dados
+    SQLite protegido por criptografia (SQLCipher).</li>
+    <li><strong>Nunca são enviados para nenhum servidor</strong> — o ControlContFin não possui
+    nenhum backend, API remota ou serviço de nuvem associado.</li>
+    <li>Não são compartilhados com terceiros, porque não existe nenhum mecanismo de
+    compartilhamento automático no aplicativo.</li>
+  </ul>
+
+  <h2>2. Autenticação (PIN e biometria)</h2>
+  <ul>
+    <li>O PIN de bloqueio do aplicativo é armazenado apenas como um <strong>hash criptográfico
+    salgado</strong> (PBKDF2), guardado no armazenamento seguro do sistema operacional (Keychain
+    no iOS, Keystore no Android) — nunca em texto simples, nunca fora do aparelho.</li>
+    <li>Quando o usuário opta por usar biometria (Face ID, Touch ID ou impressão digital), o
+    aplicativo <strong>nunca recebe o dado biométrico em si</strong>. Toda a verificação é feita
+    pelo próprio sistema operacional, que devolve ao aplicativo apenas um resultado de
+    sucesso ou falha.</li>
+  </ul>
+
+  <h2>3. Notificações</h2>
+  <p>
+    O aplicativo pode enviar lembretes locais sobre transações recorrentes programadas pelo
+    usuário. Essas notificações são agendadas e disparadas inteiramente pelo sistema operacional
+    do aparelho — não existe nenhum servidor de push envolvido, e nenhum dado é enviado para fora
+    do aparelho para gerar essas notificações.
+  </p>
+
+  <h2>4. Backup manual</h2>
+  <p>
+    O aplicativo permite exportar um arquivo de backup criptografado, a pedido do próprio usuário.
+    Esse arquivo é entregue diretamente ao usuário (por exemplo, através do menu de
+    compartilhamento do sistema), que decide onde guardá-lo. O desenvolvedor do ControlContFin
+    <strong>nunca tem acesso</strong> a esse arquivo ou ao seu conteúdo.
+  </p>
+
+  <h2>5. Contas, login e serviços de terceiros</h2>
+  <p>
+    O ControlContFin não exige criação de conta, não possui login, não integra nenhum provedor de
+    identidade de terceiros, não utiliza ferramentas de análise de uso (analytics), não exibe
+    anúncios e não incorpora nenhum SDK de terceiros com finalidade de coleta de dados.
+  </p>
+
+  <h2>6. Seus direitos (LGPD)</h2>
+  <p>
+    Nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018), o titular dos dados tem
+    direito a acesso, correção, eliminação, portabilidade e demais garantias previstas em lei.
+    Como todos os dados do ControlContFin já estão inteiramente sob controle do próprio usuário,
+    no seu próprio aparelho, esses direitos são exercidos diretamente:
+  </p>
+  <ul>
+    <li><strong>Acesso e correção</strong>: qualquer dado pode ser visualizado e editado
+    diretamente nas telas do aplicativo.</li>
+    <li><strong>Eliminação</strong>: apagar um registro no aplicativo o remove permanentemente;
+    desinstalar o aplicativo remove todos os dados do aparelho.</li>
+    <li><strong>Portabilidade</strong>: a função de exportação (CSV/JSON ou backup completo)
+    permite ao usuário levar seus dados para onde quiser, a qualquer momento.</li>
+  </ul>
+  <p>
+    Como o desenvolvedor nunca recebe nem armazena esses dados, não há nada a solicitar por
+    e-mail ou formulário — o controle já está inteiramente nas mãos do usuário.
+  </p>
+
+  <h2>7. Crianças e adolescentes</h2>
+  <p>
+    O aplicativo não é direcionado a crianças e não coleta, de forma consciente, dados de menores
+    de idade — nem de nenhum outro usuário, já que nenhum dado é coletado pelo desenvolvedor em
+    nenhuma hipótese.
+  </p>
+
+  <h2>8. Alterações nesta política</h2>
+  <p>
+    Esta política pode ser atualizada eventualmente para refletir mudanças no aplicativo. A data
+    da última atualização é sempre indicada no topo desta página. Alterações relevantes serão
+    comunicadas através das notas de atualização do aplicativo nas lojas.
+  </p>
+
+  <h2>9. Contato</h2>
+  <p>
+    Dúvidas sobre esta política podem ser enviadas para:
+    <span class="placeholder">[confirmar e-mail de suporte — sugestão inicial: clemilton.cunha.silva@gmail.com]</span>
+  </p>
+
+  <footer>
+    ControlContFin — aplicativo de controle financeiro pessoal.
+    Desenvolvido por <span class="placeholder">[nome / razão social do desenvolvedor]</span>.
+  </footer>
+
+</div>
+</body>
+</html>

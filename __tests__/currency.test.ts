@@ -15,7 +15,7 @@ describe('currency utils', () => {
     expect(brlToCents('5,00')).toBe(500);
   });
 
-  it('returns 0 for an unparsable value', () => {
-    expect(brlToCents('abc')).toBe(0);
+  it('throws for an unparsable value', () => {
+    expect(() => brlToCents('abc')).toThrow();
   });
 });

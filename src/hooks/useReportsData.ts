@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { useAccounts } from '@/hooks/useAccounts';
 import { useCategories } from '@/hooks/useCategories';
+import { useLookup } from '@/hooks/useLookup';
 import { useTransactions } from '@/hooks/useTransactions';
 import {
   aggregateByCategory,
@@ -17,14 +18,8 @@ export function useReportsData() {
   const { categories, loading: loadingCategories } = useCategories();
   const { accounts, loading: loadingAccounts } = useAccounts({ includeArchived: true });
 
-  const categoryLookup = useMemo(
-    () => new Map(categories.map((category) => [category.id, category])),
-    [categories],
-  );
-  const accountLookup = useMemo(
-    () => new Map(accounts.map((account) => [account.id, account])),
-    [accounts],
-  );
+  const categoryLookup = useLookup(categories);
+  const accountLookup = useLookup(accounts);
 
   const months = useMemo(() => lastNMonths(TREND_MONTHS), []);
 

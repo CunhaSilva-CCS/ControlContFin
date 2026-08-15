@@ -5,7 +5,7 @@ import { Card, Text } from 'react-native-paper';
 
 import { PinPad } from '@/components/auth/PinPad';
 import { colors, fontFamily, spacing } from '@/constants/theme';
-import { resetAppLock, verifyPinAttempt } from '@/services/auth/authService';
+import { DEFAULT_AUTO_LOCK_MINUTES, resetAppLock, verifyPinAttempt } from '@/services/auth/authService';
 import { authenticateWithBiometrics } from '@/services/auth/biometricAuth';
 import { PIN_LENGTH } from '@/services/auth/pinPolicy';
 import { useAuthStore } from '@/store/authStore';
@@ -27,6 +27,7 @@ export function LockScreen() {
   const [now, setNow] = useState(Date.now());
   const biometricEnabled = useAuthStore((state) => state.biometricEnabled);
   const setStatus = useAuthStore((state) => state.setStatus);
+  const setSettings = useAuthStore((state) => state.setSettings);
 
   useEffect(() => {
     if (lockedUntilMs === null) {
@@ -100,6 +101,7 @@ export function LockScreen() {
           style: 'destructive',
           onPress: async () => {
             await resetAppLock();
+            setSettings({ biometricEnabled: false, autoLockMinutes: DEFAULT_AUTO_LOCK_MINUTES });
             setStatus('needs_setup');
           },
         },

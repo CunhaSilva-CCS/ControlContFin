@@ -34,15 +34,24 @@ const GoalRow = memo(function GoalRow({ goal, onPress }: GoalRowProps) {
 });
 
 export function GoalsTab({ onSelectGoal }: GoalsTabProps) {
-  const { goals } = useGoals();
+  const { goals, loading, error } = useGoals();
 
   const renderItem = useCallback(
     ({ item }: { item: GoalWithProgress }) => <GoalRow goal={item} onPress={onSelectGoal} />,
     [onSelectGoal],
   );
 
+  if (loading) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
+      {error && (
+        <Text variant="bodyMedium" style={styles.error}>
+          {error.message}
+        </Text>
+      )}
       {goals.length === 0 ? (
         <PlaceholderScreen
           title="Nenhuma meta"
@@ -67,5 +76,9 @@ const styles = StyleSheet.create({
   progressBar: {
     height: 8,
     borderRadius: 4,
+  },
+  error: {
+    color: colors.expense,
+    padding: spacing.md,
   },
 });

@@ -1,7 +1,9 @@
+import { eq } from 'drizzle-orm';
+
 import { db } from '@/db/client';
-import { listRecurringRules, updateRecurringRule } from '@/db/repositories/recurringRules';
-import { createTransaction } from '@/db/repositories/transactions';
-import type { recurringRules } from '@/db/schema';
+import { listRecurringRules } from '@/db/repositories/recurringRules';
+import { recurringRules, transactions } from '@/db/schema';
+import { useDataStore } from '@/store/dataStore';
 
 import { generateDueOccurrences, type RecurringRuleData } from './recurringEngine';
 import { cancelRecurringReminder, scheduleRecurringReminder } from './notifications';
@@ -41,20 +43,6 @@ export async function runRecurringGeneration(today: string): Promise<number> {
       continue;
     }
 
-    for (const occurrence of result.occurrences) {
-      await createTransaction(db, {
-        accountId: row.accountId,
-        categoryId: row.categoryId,
-        type: row.type,
-        amountCents: row.amountCents,
-        date: occurrence.date,
-        description: row.description,
-        recurringRuleId: row.id,
-        isRecurringGenerated: true,
-      });
-      generatedCount += 1;
-    }
-
     await cancelRecurringReminder(row.notificationId);
     const newNotificationId = await scheduleRecurringReminder({
       title: 'Lançamento recorrente',
@@ -63,11 +51,40 @@ export async function runRecurringGeneration(today: string): Promise<number> {
       notifyBeforeDays: row.notifyBeforeDays,
     });
 
-    await updateRecurringRule(db, row.id, {
-      nextRunDate: result.nextRunDate,
-      lastGeneratedDate: result.lastGeneratedDate,
-      notificationId: newNotificationId,
+    db.transaction((tx) => {
+      for (const occurrence of result.occurrences) {
+        tx.insert(transactions)
+          .values({
+            accountId: row.accountId,
+            categoryId: row.categoryId,
+            type: row.type,
+            amountCents: row.amountCents,
+            date: occurrence.date,
+            description: row.description,
+            recurringRuleId: row.id,
+            isRecurringGenerated: true,
+          })
+          .run();
+      }
+
+      tx.update(recurringRules)
+        .set({
+          nextRunDate: result.nextRunDate,
+          lastGeneratedDate: result.lastGeneratedDate,
+          notificationId: newNotificationId,
+        })
+        .where(eq(recurringRules.id, row.id))
+        .run();
     });
+
+    generatedCount += result.occurrences.length;
+  }
+
+  if (generatedCount > 0) {
+    const { bump } = useDataStore.getState();
+    bump('transactions');
+    bump('accounts');
+    bump('recurringRules');
   }
 
   return generatedCount;
