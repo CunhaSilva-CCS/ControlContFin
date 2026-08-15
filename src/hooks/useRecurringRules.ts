@@ -5,7 +5,7 @@ import { useDataStore } from '@/store/dataStore';
 
 import { useAsyncQuery } from './useAsyncQuery';
 
-type RecurringRule = typeof recurringRules.$inferSelect;
+export type RecurringRule = typeof recurringRules.$inferSelect;
 
 export function useRecurringRules() {
   const version = useDataStore((state) => state.version.transactions);

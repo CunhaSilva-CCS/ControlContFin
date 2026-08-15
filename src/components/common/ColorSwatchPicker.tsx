@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { spacing } from '@/constants/theme';
+import { colors as themeColors, spacing } from '@/constants/theme';
 
 type ColorSwatchPickerProps = {
   colors: readonly string[];
@@ -42,6 +42,6 @@ const styles = StyleSheet.create({
   },
   swatchSelected: {
     borderWidth: 3,
-    borderColor: '#000000',
+    borderColor: themeColors.accent,
   },
 });

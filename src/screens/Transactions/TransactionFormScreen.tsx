@@ -97,7 +97,12 @@ export function TransactionFormScreen({ route, navigation }: Props) {
       )}
       <SegmentedButtons
         value={type}
-        onValueChange={(value) => setType(value as TransactionType)}
+        onValueChange={(value) => {
+          setType(value as TransactionType);
+          // The category list is filtered by type (line 35) — a category id
+          // chosen under the old type may not belong to the new one.
+          setCategoryId(null);
+        }}
         buttons={[
           { value: 'expense', label: 'Despesa' },
           { value: 'income', label: 'Receita' },

@@ -1,5 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { useCallback, useMemo } from 'react';
+import { FlatList, type ListRenderItemInfo, StyleSheet, View } from 'react-native';
 import { FAB } from 'react-native-paper';
 
 import { PlaceholderScreen } from '@/components/common/PlaceholderScreen';
@@ -15,21 +16,39 @@ export function TransactionsListScreen({ navigation }: Props) {
   const { transactions } = useTransactions();
   const { categories } = useCategories();
 
-  const categoryById = new Map(categories.map((category) => [category.id, category]));
+  const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
 
-  const rows: TransactionRowData[] = transactions.map((transaction) => {
-    const category = transaction.categoryId ? categoryById.get(transaction.categoryId) : undefined;
-    return {
-      id: transaction.id,
-      amountCents: transaction.amountCents,
-      date: transaction.date,
-      description: transaction.description,
-      type: transaction.type,
-      categoryName: category?.name ?? null,
-      categoryIcon: category?.icon ?? null,
-      categoryColor: category?.color ?? null,
-    };
-  });
+  const rows: TransactionRowData[] = useMemo(
+    () =>
+      transactions.map((transaction) => {
+        const category = transaction.categoryId ? categoryById.get(transaction.categoryId) : undefined;
+        return {
+          id: transaction.id,
+          amountCents: transaction.amountCents,
+          date: transaction.date,
+          description: transaction.description,
+          type: transaction.type,
+          categoryName: category?.name ?? null,
+          categoryIcon: category?.icon ?? null,
+          categoryColor: category?.color ?? null,
+        };
+      }),
+    [transactions, categoryById],
+  );
+
+  const openTransaction = useCallback(
+    (transactionId: number) => {
+      navigation.navigate('TransactionDetail', { transactionId });
+    },
+    [navigation],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<TransactionRowData>) => (
+      <TransactionRow transaction={item} onPress={openTransaction} />
+    ),
+    [openTransaction],
+  );
 
   return (
     <View style={styles.container}>
@@ -39,16 +58,7 @@ export function TransactionsListScreen({ navigation }: Props) {
           description="Toque no botão + para registrar sua primeira receita ou despesa."
         />
       ) : (
-        <FlatList
-          data={rows}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => (
-            <TransactionRow
-              transaction={item}
-              onPress={() => navigation.navigate('TransactionDetail', { transactionId: item.id })}
-            />
-          )}
-        />
+        <FlatList data={rows} keyExtractor={(item) => String(item.id)} renderItem={renderItem} />
       )}
       <FAB
         icon="plus"

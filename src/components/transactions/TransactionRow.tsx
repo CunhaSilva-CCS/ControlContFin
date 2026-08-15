@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
@@ -19,10 +20,12 @@ export type TransactionRowData = {
 
 type TransactionRowProps = {
   transaction: TransactionRowData;
-  onPress: () => void;
+  /** Receives the transaction id, so callers can pass one stable function
+   *  reference instead of a new closure per row on every render. */
+  onPress: (id: number) => void;
 };
 
-export function TransactionRow({ transaction, onPress }: TransactionRowProps) {
+export const TransactionRow = memo(function TransactionRow({ transaction, onPress }: TransactionRowProps) {
   const amountColor =
     transaction.type === 'income'
       ? colors.income
@@ -35,8 +38,12 @@ export function TransactionRow({ transaction, onPress }: TransactionRowProps) {
     transaction.amountCents,
   )}, ${formatDatePtBR(transaction.date)}`;
 
+  function handlePress() {
+    onPress(transaction.id);
+  }
+
   return (
-    <Pressable onPress={onPress} style={styles.row} accessibilityRole="button" accessibilityLabel={label}>
+    <Pressable onPress={handlePress} style={styles.row} accessibilityRole="button" accessibilityLabel={label}>
       <View
         style={[
           styles.iconCircle,
@@ -61,7 +68,7 @@ export function TransactionRow({ transaction, onPress }: TransactionRowProps) {
       </Text>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   row: {

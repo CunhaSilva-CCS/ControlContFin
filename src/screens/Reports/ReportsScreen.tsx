@@ -1,26 +1,55 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { BarChart, LineChart, PieChart } from 'react-native-gifted-charts';
 import { Button, Card, Text } from 'react-native-paper';
 
 import { PlaceholderScreen } from '@/components/common/PlaceholderScreen';
 import { colors, spacing } from '@/constants/theme';
-import { useAccounts } from '@/hooks/useAccounts';
-import { useCategories } from '@/hooks/useCategories';
 import { useReportsData } from '@/hooks/useReportsData';
-import { useTransactions } from '@/hooks/useTransactions';
 import { transactionsToCSV, transactionsToJSON, type ExportableTransaction } from '@/services/exportService';
 import { writeAndShareFile } from '@/services/fileShare';
 import { centsToBRL } from '@/utils/currency';
 import { formatMonthLabelPtBR } from '@/utils/date';
 
 export function ReportsScreen() {
-  const { categoryBreakdown, monthlyTotals, balanceTrend, loading } = useReportsData();
-  const { transactions } = useTransactions();
-  const { categories } = useCategories();
-  const { accounts } = useAccounts({ includeArchived: true });
+  const { transactions, categoryLookup, accountLookup, categoryBreakdown, monthlyTotals, balanceTrend, loading } =
+    useReportsData();
 
-  const categoryLookup = new Map(categories.map((category) => [category.id, category]));
-  const accountLookup = new Map(accounts.map((account) => [account.id, account]));
+  const pieData = useMemo(
+    () =>
+      categoryBreakdown.map((item) => ({
+        value: item.totalCents,
+        color: item.color,
+        text: item.percent >= 8 ? `${item.percent.toFixed(0)}%` : '',
+      })),
+    [categoryBreakdown],
+  );
+
+  const barData = useMemo(
+    () =>
+      monthlyTotals.flatMap((item) => [
+        {
+          value: item.incomeCents / 100,
+          frontColor: colors.income,
+          label: formatMonthLabelPtBR(item.month),
+          spacing: 2,
+        },
+        {
+          value: item.expenseCents / 100,
+          frontColor: colors.expense,
+        },
+      ]),
+    [monthlyTotals],
+  );
+
+  const lineData = useMemo(
+    () =>
+      balanceTrend.map((point) => ({
+        value: point.balanceCents / 100,
+        label: formatMonthLabelPtBR(point.month),
+      })),
+    [balanceTrend],
+  );
 
   async function handleExport(format: 'csv' | 'json') {
     const exportable: ExportableTransaction[] = transactions.map((transaction) => ({
@@ -51,30 +80,6 @@ export function ReportsScreen() {
       />
     );
   }
-
-  const pieData = categoryBreakdown.map((item) => ({
-    value: item.totalCents,
-    color: item.color,
-    text: item.percent >= 8 ? `${item.percent.toFixed(0)}%` : '',
-  }));
-
-  const barData = monthlyTotals.flatMap((item) => [
-    {
-      value: item.incomeCents / 100,
-      frontColor: colors.income,
-      label: formatMonthLabelPtBR(item.month),
-      spacing: 2,
-    },
-    {
-      value: item.expenseCents / 100,
-      frontColor: colors.expense,
-    },
-  ]);
-
-  const lineData = balanceTrend.map((point) => ({
-    value: point.balanceCents / 100,
-    label: formatMonthLabelPtBR(point.month),
-  }));
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

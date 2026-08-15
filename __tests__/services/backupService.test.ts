@@ -110,10 +110,32 @@ describe('backup snapshot round-trip', () => {
     expect(restoredAccounts[0].name).toBe('Principal');
   });
 
-  it('rejects a snapshot with an unsupported version', async () => {
+  it('rejects a snapshot with an unsupported version without touching existing data', async () => {
     const db = createTestDatabase();
+    await seedSampleData(db);
     const snapshot = await buildBackupSnapshot(db);
 
     await expect(restoreBackupSnapshot(db, { ...snapshot, version: 999 })).rejects.toThrow();
+
+    const survivingAccounts = await db.select().from(accounts);
+    expect(survivingAccounts).toHaveLength(1);
+  });
+
+  it('rejects a corrupted snapshot (missing table data) without wiping existing data', async () => {
+    const db = createTestDatabase();
+    await seedSampleData(db);
+    const snapshot = await buildBackupSnapshot(db);
+
+    const corrupted = {
+      ...snapshot,
+      data: { ...snapshot.data, goalContributions: undefined as never },
+    };
+
+    await expect(restoreBackupSnapshot(db, corrupted)).rejects.toThrow();
+
+    const survivingAccounts = await db.select().from(accounts);
+    const survivingTransactions = await db.select().from(transactions);
+    expect(survivingAccounts).toHaveLength(1);
+    expect(survivingTransactions).toHaveLength(1);
   });
 });

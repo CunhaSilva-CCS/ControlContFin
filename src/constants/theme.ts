@@ -1,17 +1,23 @@
 import { MD3LightTheme, type MD3Theme } from 'react-native-paper';
 
 export const colors = {
-  primary: '#1B5E4F',
-  primaryContainer: '#CFEFE3',
-  secondary: '#3F6B5C',
-  background: '#F7F8F6',
+  primary: '#14293D',
+  primaryContainer: '#D9E1E8',
+  secondary: '#3A4A58',
+  /** Muted bronze/gold. Applied only where explicitly chosen (active tab,
+   *  balance-card highlight, selection rings) — deliberately NOT wired into
+   *  Paper's `secondary`/`secondaryContainer`, which would spread it into
+   *  default component states (selected Chip, SegmentedButtons, tonal
+   *  buttons) that weren't hand-picked for it. */
+  accent: '#B08D57',
+  background: '#FAF6EF',
   surface: '#FFFFFF',
-  textPrimary: '#1A1C1B',
-  textSecondary: '#5C635F',
-  income: '#2E7D32',
-  expense: '#C62828',
-  warning: '#B8860B',
-  border: '#E1E4E1',
+  textPrimary: '#1C2530',
+  textSecondary: '#5B6773',
+  income: '#276A4C',
+  expense: '#8C3A3A',
+  warning: '#B08D57',
+  border: '#E4DECF',
 } as const;
 
 export const spacing = {
@@ -20,6 +26,11 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
+} as const;
+
+export const fontFamily = {
+  serif: 'PlayfairDisplay_700Bold',
+  serifSemiBold: 'PlayfairDisplay_600SemiBold',
 } as const;
 
 export const typography = {
@@ -31,6 +42,7 @@ export const typography = {
 
 export const paperTheme: MD3Theme = {
   ...MD3LightTheme,
+  roundness: 2,
   colors: {
     ...MD3LightTheme.colors,
     primary: colors.primary,
@@ -39,5 +51,9 @@ export const paperTheme: MD3Theme = {
     background: colors.background,
     surface: colors.surface,
     error: colors.expense,
+    onSurface: colors.textPrimary,
+    onSurfaceVariant: colors.textSecondary,
+    outline: colors.border,
+    onPrimaryContainer: colors.primary,
   },
 };

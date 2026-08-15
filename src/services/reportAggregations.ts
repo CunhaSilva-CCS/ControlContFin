@@ -1,3 +1,4 @@
+import { colors } from '@/constants/theme';
 import type { TransactionType } from '@/db/schema';
 
 export type TransactionForAggregation = {
@@ -37,7 +38,7 @@ export function aggregateByCategory(
     return {
       categoryId,
       categoryName: info?.name ?? 'Sem categoria',
-      color: info?.color ?? '#9E9E9E',
+      color: info?.color ?? colors.textSecondary,
       totalCents,
       percent: grandTotal > 0 ? (totalCents / grandTotal) * 100 : 0,
     };

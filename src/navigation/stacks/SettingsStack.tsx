@@ -9,13 +9,14 @@ import { RecurringRulesListScreen } from '@/screens/Settings/RecurringRulesListS
 import { SecuritySettingsScreen } from '@/screens/Settings/SecuritySettingsScreen';
 import { SettingsScreen } from '@/screens/Settings/SettingsScreen';
 
+import { stackScreenOptions } from '../navigationTheme';
 import type { SettingsStackParamList } from '../types';
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
 
 export function SettingsStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={stackScreenOptions}>
       <Stack.Screen name="SettingsHome" component={SettingsScreen} options={{ title: 'Ajustes' }} />
       <Stack.Screen name="AccountsList" component={AccountsListScreen} options={{ title: 'Contas' }} />
       <Stack.Screen

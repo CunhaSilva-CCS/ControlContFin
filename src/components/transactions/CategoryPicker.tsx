@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { Chip } from 'react-native-paper';
 
@@ -12,7 +13,11 @@ type CategoryPickerProps = {
   onSelect: (id: number) => void;
 };
 
-export function CategoryPicker({ categories: categoryList, selectedId, onSelect }: CategoryPickerProps) {
+export const CategoryPicker = memo(function CategoryPicker({
+  categories: categoryList,
+  selectedId,
+  onSelect,
+}: CategoryPickerProps) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.container}>
       {categoryList.map((category) => (
@@ -28,7 +33,7 @@ export function CategoryPicker({ categories: categoryList, selectedId, onSelect 
       ))}
     </ScrollView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

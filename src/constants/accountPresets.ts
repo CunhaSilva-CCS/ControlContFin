@@ -15,12 +15,12 @@ export const accountIconByType: Record<string, string> = {
 };
 
 export const accountColorPalette = [
-  '#1B5E4F',
-  '#0277BD',
-  '#6A1B9A',
-  '#C62828',
-  '#EF6C00',
-  '#4527A0',
-  '#00838F',
-  '#AD1457',
+  '#14293D',
+  '#B08D57',
+  '#2F6B63',
+  '#8C3A3A',
+  '#276A4C',
+  '#4A5C73',
+  '#8A7355',
+  '#3D3833',
 ];

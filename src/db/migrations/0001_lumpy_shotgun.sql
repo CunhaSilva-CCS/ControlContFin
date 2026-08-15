@@ -1,0 +1,1 @@
+CREATE INDEX `transactions_transfer_account_idx` ON `transactions` (`transfer_account_id`,`type`);

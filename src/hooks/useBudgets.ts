@@ -1,5 +1,5 @@
 import { db } from '@/db/client';
-import { getSpentCentsForCategory, listBudgets } from '@/db/repositories/budgets';
+import { getSpentCentsByCategoryForMonth, listBudgets } from '@/db/repositories/budgets';
 import type { budgets } from '@/db/schema';
 import { calculateBudgetProgress, type BudgetProgress } from '@/services/budgetCalculations';
 import { useDataStore } from '@/store/dataStore';
@@ -15,13 +15,14 @@ export function useBudgets(month: string) {
   const transactionsVersion = useDataStore((state) => state.version.transactions);
   const { data, loading, error } = useAsyncQuery<BudgetWithProgress[]>(
     async () => {
-      const rows = await listBudgets(db, month);
-      return Promise.all(
-        rows.map(async (budget) => {
-          const spentCents = await getSpentCentsForCategory(db, budget.categoryId, month);
-          return { ...budget, progress: calculateBudgetProgress(spentCents, budget.limitCents) };
-        }),
-      );
+      const [rows, { totalCents, byCategoryId }] = await Promise.all([
+        listBudgets(db, month),
+        getSpentCentsByCategoryForMonth(db, month),
+      ]);
+      return rows.map((budget) => {
+        const spentCents = budget.categoryId === null ? totalCents : byCategoryId.get(budget.categoryId) ?? 0;
+        return { ...budget, progress: calculateBudgetProgress(spentCents, budget.limitCents) };
+      });
     },
     [month, budgetsVersion, transactionsVersion],
     [],

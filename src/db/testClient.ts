@@ -12,6 +12,7 @@ import type { AppDatabase } from './types';
  */
 export function createTestDatabase(): AppDatabase {
   const sqlite = new Database(':memory:');
+  sqlite.pragma('foreign_keys = ON');
   const db = drizzle(sqlite, { schema });
   migrate(db, { migrationsFolder: path.join(__dirname, 'migrations') });
   return db as unknown as AppDatabase;
