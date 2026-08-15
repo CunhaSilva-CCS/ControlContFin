@@ -10,6 +10,7 @@ import { colors, fontFamily, spacing } from '@/constants/theme';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useAccountBalances } from '@/hooks/useAccountBalance';
 import { useCategories } from '@/hooks/useCategories';
+import { useLookup } from '@/hooks/useLookup';
 import { useTransactions } from '@/hooks/useTransactions';
 import type { DashboardStackParamList, RootTabParamList } from '@/navigation/types';
 import { centsToBRL } from '@/utils/currency';
@@ -29,14 +30,18 @@ function AccountBalanceRow({ name, balanceCents }: { name: string; balanceCents:
 }
 
 export function DashboardScreen({ navigation }: Props) {
-  const { balances } = useAccountBalances();
-  const { accounts } = useAccounts();
-  const { categories } = useCategories();
-  const { transactions } = useTransactions({ limit: 5 });
+  const { balances, loading: loadingBalances, error: errorBalances } = useAccountBalances();
+  const { accounts, loading: loadingAccounts, error: errorAccounts } = useAccounts();
+  const { categories, loading: loadingCategories, error: errorCategories } = useCategories();
+  const { transactions, loading: loadingTransactions, error: errorTransactions } = useTransactions({ limit: 5 });
+
+  const loading = loadingBalances || loadingAccounts || loadingCategories || loadingTransactions;
+  const error = errorBalances || errorAccounts || errorCategories || errorTransactions;
 
   const totalCents = Array.from(balances.values()).reduce((sum, cents) => sum + cents, 0);
 
-  const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
+  const categoryById = useLookup(categories);
+  const accountById = useLookup(accounts);
   const recentTransactions: TransactionRowData[] = useMemo(
     () =>
       transactions.map((transaction) => {
@@ -50,9 +55,13 @@ export function DashboardScreen({ navigation }: Props) {
           categoryName: category?.name ?? null,
           categoryIcon: category?.icon ?? null,
           categoryColor: category?.color ?? null,
+          accountName: accountById.get(transaction.accountId)?.name ?? null,
+          transferAccountName: transaction.transferAccountId
+            ? (accountById.get(transaction.transferAccountId)?.name ?? null)
+            : null,
         };
       }),
-    [transactions, categoryById],
+    [transactions, categoryById, accountById],
   );
 
   const openTransaction = useCallback(
@@ -62,8 +71,17 @@ export function DashboardScreen({ navigation }: Props) {
     [navigation],
   );
 
+  if (loading) {
+    return null;
+  }
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {error && (
+        <Text variant="bodyMedium" style={styles.error}>
+          {error.message}
+        </Text>
+      )}
       <Card style={styles.balanceCard} mode="contained">
         <Card.Content>
           <Text variant="titleMedium" style={styles.balanceLabel}>
@@ -133,6 +151,9 @@ const styles = StyleSheet.create({
     color: colors.surface,
     fontFamily: fontFamily.serif,
     marginTop: spacing.xs,
+  },
+  error: {
+    color: colors.expense,
   },
   accountRow: {
     flexDirection: 'row',

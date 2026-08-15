@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ProgressBar, Text } from 'react-native-paper';
 
@@ -7,6 +7,7 @@ import { colors, spacing } from '@/constants/theme';
 import type { categories as categoriesTable } from '@/db/schema';
 import { useBudgets, type BudgetWithProgress } from '@/hooks/useBudgets';
 import { useCategories } from '@/hooks/useCategories';
+import { useLookup } from '@/hooks/useLookup';
 import { centsToBRL } from '@/utils/currency';
 import { currentMonth } from '@/utils/date';
 
@@ -43,10 +44,10 @@ const BudgetRow = memo(function BudgetRow({ budget, category, onPress }: BudgetR
 
 export function BudgetsTab({ onSelectBudget }: BudgetsTabProps) {
   const month = currentMonth();
-  const { budgets } = useBudgets(month);
+  const { budgets, loading, error } = useBudgets(month);
   const { categories } = useCategories('expense');
 
-  const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
+  const categoryById = useLookup(categories);
 
   const renderItem = useCallback(
     ({ item }: { item: BudgetWithProgress }) => (
@@ -59,8 +60,17 @@ export function BudgetsTab({ onSelectBudget }: BudgetsTabProps) {
     [categoryById, onSelectBudget],
   );
 
+  if (loading) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
+      {error && (
+        <Text variant="bodyMedium" style={styles.error}>
+          {error.message}
+        </Text>
+      )}
       {budgets.length === 0 ? (
         <PlaceholderScreen
           title="Nenhum orçamento"
@@ -88,5 +98,9 @@ const styles = StyleSheet.create({
   },
   overBudgetText: {
     color: colors.expense,
+  },
+  error: {
+    color: colors.expense,
+    padding: spacing.md,
   },
 });

@@ -22,13 +22,20 @@ export function GoalContributeScreen({ route, navigation }: Props) {
   const { goalId } = route.params;
   const [goal, setGoal] = useState<Goal | null>(null);
   const [contributionCents, setContributionCents] = useState(0);
+  const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const goalsVersion = useDataStore((state) => state.version.goals);
 
   useEffect(() => {
     getGoal(db, goalId)
-      .then((row) => setGoal(row ?? null))
-      .catch(() => setLoadError('Não foi possível carregar esta meta.'));
+      .then((row) => {
+        setGoal(row ?? null);
+        setLoaded(true);
+      })
+      .catch(() => {
+        setLoadError('Não foi possível carregar esta meta.');
+        setLoaded(true);
+      });
   }, [goalId, goalsVersion]);
 
   async function handleContribute() {
@@ -44,6 +51,10 @@ export function GoalContributeScreen({ route, navigation }: Props) {
     navigation.goBack();
   }
 
+  if (!loaded) {
+    return null;
+  }
+
   if (loadError) {
     return (
       <View style={styles.container}>
@@ -55,7 +66,11 @@ export function GoalContributeScreen({ route, navigation }: Props) {
   }
 
   if (!goal) {
-    return null;
+    return (
+      <View style={styles.container}>
+        <Text variant="bodyMedium">Meta não encontrada.</Text>
+      </View>
+    );
   }
 
   const progress = calculateGoalProgress(goal.currentCents, goal.targetCents);

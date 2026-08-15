@@ -17,7 +17,7 @@ const TYPE_LABELS: Record<TransactionType, string> = {
 };
 
 function escapeCsvField(value: string): string {
-  if (/[",\n]/.test(value)) {
+  if (/[",\r\n]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`;
   }
   return value;

@@ -83,6 +83,7 @@ export function AccountFormScreen({ route, navigation }: Props) {
         label="Saldo inicial"
         valueCents={initialBalanceCents}
         onChangeCents={setInitialBalanceCents}
+        allowNegative
       />
 
       <ColorSwatchPicker colors={accountColorPalette} selectedColor={color} onSelect={setColor} />
