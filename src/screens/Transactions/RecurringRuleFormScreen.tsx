@@ -19,12 +19,12 @@ import {
 import { recurringFrequencyValues, type RecurringFrequency } from '@/db/schema';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useCategories } from '@/hooks/useCategories';
-import type { SettingsStackParamList } from '@/navigation/types';
+import type { TransactionsStackParamList } from '@/navigation/types';
 import { cancelRecurringReminder, scheduleRecurringReminder } from '@/services/notifications';
 import { runRecurringGeneration } from '@/services/runRecurringGeneration';
 import { todayISODate } from '@/utils/date';
 
-type Props = NativeStackScreenProps<SettingsStackParamList, 'RecurringRuleForm'>;
+type Props = NativeStackScreenProps<TransactionsStackParamList, 'RecurringRuleForm'>;
 
 export function RecurringRuleFormScreen({ route, navigation }: Props) {
   const ruleId = route.params?.ruleId;

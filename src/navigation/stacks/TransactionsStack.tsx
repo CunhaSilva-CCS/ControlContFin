@@ -1,5 +1,9 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { IconButton } from 'react-native-paper';
 
+import { colors } from '@/constants/theme';
+import { RecurringRuleFormScreen } from '@/screens/Transactions/RecurringRuleFormScreen';
+import { RecurringRulesListScreen } from '@/screens/Transactions/RecurringRulesListScreen';
 import { TransactionDetailScreen } from '@/screens/Transactions/TransactionDetailScreen';
 import { TransactionFormScreen } from '@/screens/Transactions/TransactionFormScreen';
 import { TransactionsListScreen } from '@/screens/Transactions/TransactionsListScreen';
@@ -15,7 +19,17 @@ export function TransactionsStack() {
       <Stack.Screen
         name="TransactionsList"
         component={TransactionsListScreen}
-        options={{ title: 'Transações' }}
+        options={({ navigation }) => ({
+          title: 'Transações',
+          headerRight: () => (
+            <IconButton
+              icon="sync"
+              iconColor={colors.surface}
+              accessibilityLabel="Transações recorrentes"
+              onPress={() => navigation.navigate('RecurringRulesList')}
+            />
+          ),
+        })}
       />
       <Stack.Screen
         name="TransactionForm"
@@ -26,6 +40,16 @@ export function TransactionsStack() {
         name="TransactionDetail"
         component={TransactionDetailScreen}
         options={{ title: 'Detalhe' }}
+      />
+      <Stack.Screen
+        name="RecurringRulesList"
+        component={RecurringRulesListScreen}
+        options={{ title: 'Transações recorrentes' }}
+      />
+      <Stack.Screen
+        name="RecurringRuleForm"
+        component={RecurringRuleFormScreen}
+        options={{ title: 'Recorrência' }}
       />
     </Stack.Navigator>
   );

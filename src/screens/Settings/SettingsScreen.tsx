@@ -16,12 +16,6 @@ export function SettingsScreen({ navigation }: Props) {
         onPress={() => navigation.navigate('AccountsList')}
       />
       <List.Item
-        title="Transações recorrentes"
-        description="Contas fixas e assinaturas com lembretes automáticos"
-        left={(props) => <List.Icon {...props} icon="sync" />}
-        onPress={() => navigation.navigate('RecurringRulesList')}
-      />
-      <List.Item
         title="Backup"
         description="Backup automático diário, exportação e restauração"
         left={(props) => <List.Icon {...props} icon="cloud-upload" />}

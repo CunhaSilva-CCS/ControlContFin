@@ -8,6 +8,8 @@ export type TransactionsStackParamList = {
   TransactionsList: undefined;
   TransactionForm: { transactionId?: number } | undefined;
   TransactionDetail: { transactionId: number };
+  RecurringRulesList: undefined;
+  RecurringRuleForm: { ruleId?: number } | undefined;
 };
 
 export type BudgetsGoalsStackParamList = {
@@ -23,8 +25,6 @@ export type SettingsStackParamList = {
   SettingsHome: undefined;
   AccountsList: undefined;
   AccountForm: { accountId?: number } | undefined;
-  RecurringRulesList: undefined;
-  RecurringRuleForm: { ruleId?: number } | undefined;
   Backup: undefined;
   SecuritySettings: undefined;
   ChangePin: undefined;

@@ -7,11 +7,11 @@ import { PlaceholderScreen } from '@/components/common/PlaceholderScreen';
 import { frequencyLabels } from '@/constants/recurringFrequency';
 import { colors, spacing } from '@/constants/theme';
 import { useRecurringRules, type RecurringRule } from '@/hooks/useRecurringRules';
-import type { SettingsStackParamList } from '@/navigation/types';
+import type { TransactionsStackParamList } from '@/navigation/types';
 import { centsToBRL } from '@/utils/currency';
 import { formatDatePtBR } from '@/utils/date';
 
-type Props = NativeStackScreenProps<SettingsStackParamList, 'RecurringRulesList'>;
+type Props = NativeStackScreenProps<TransactionsStackParamList, 'RecurringRulesList'>;
 
 type RecurringRuleRowProps = {
   rule: RecurringRule;
