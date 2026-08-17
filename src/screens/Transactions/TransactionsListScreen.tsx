@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { FlatList, type ListRenderItemInfo, StyleSheet, View } from 'react-native';
 import { Card, FAB, Text } from 'react-native-paper';
 
@@ -16,6 +16,7 @@ import { centsToBRL } from '@/utils/currency';
 type Props = NativeStackScreenProps<TransactionsStackParamList, 'TransactionsList'>;
 
 export function TransactionsListScreen({ navigation }: Props) {
+  const [fabOpen, setFabOpen] = useState(false);
   const { transactions, loading, error } = useTransactions();
   const { categories } = useCategories();
   const { accounts } = useAccounts();
@@ -133,11 +134,24 @@ export function TransactionsListScreen({ navigation }: Props) {
           }
         />
       )}
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        accessibilityLabel="Nova transação"
-        onPress={() => navigation.navigate('TransactionForm', undefined)}
+      <FAB.Group
+        open={fabOpen}
+        visible
+        icon={fabOpen ? 'close' : 'plus'}
+        accessibilityLabel="Adicionar"
+        onStateChange={({ open }) => setFabOpen(open)}
+        actions={[
+          {
+            icon: 'cash-plus',
+            label: 'Transação',
+            onPress: () => navigation.navigate('TransactionForm', undefined),
+          },
+          {
+            icon: 'sync',
+            label: 'Recorrência',
+            onPress: () => navigation.navigate('RecurringRuleForm', undefined),
+          },
+        ]}
       />
     </View>
   );
@@ -146,11 +160,6 @@ export function TransactionsListScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  fab: {
-    position: 'absolute',
-    right: spacing.md,
-    bottom: spacing.md,
   },
   summaryCard: {
     margin: spacing.md,
