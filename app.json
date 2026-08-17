@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ControlContFin",
-    "slug": "controlcontfin",
+    "name": "Finanças Fácil",
+    "slug": "financas-facil",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,7 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -38,13 +38,13 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Permitir que o ControlContFin use o Face ID para desbloquear o app."
+          "faceIDPermission": "Permitir que o Finanças Fácil use o Face ID para desbloquear o app."
         }
       ],
       [
         "expo-secure-store",
         {
-          "faceIDPermission": "Permitir que o ControlContFin use o Face ID para proteger seus dados de acesso."
+          "faceIDPermission": "Permitir que o Finanças Fácil use o Face ID para proteger seus dados de acesso."
         }
       ],
       [

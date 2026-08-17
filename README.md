@@ -1,4 +1,4 @@
-# ControlContFin
+# Finanças Fácil
 
 App de controle financeiro pessoal completo para iOS e Android, feito com Expo (React Native + TypeScript). Todos os dados ficam armazenados localmente no dispositivo — sem contas remotas, sem backend.
 
