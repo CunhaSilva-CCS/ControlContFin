@@ -8,7 +8,8 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cunhasilva.controlcontfin"
+      "bundleIdentifier": "com.cunhasilva.controlcontfin",
+      "appleTeamId": "797H5PK46F"
     },
     "android": {
       "adaptiveIcon": {
