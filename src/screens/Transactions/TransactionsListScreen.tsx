@@ -111,8 +111,10 @@ export function TransactionsListScreen({ navigation }: Props) {
             accountTotals.length > 0 ? (
               <Card style={styles.summaryCard} mode="contained">
                 <Card.Content>
-                  <Text variant="titleSmall" style={styles.summaryTitle}>
-                    Total por conta
+                  <Text variant="titleSmall">Movimentação por conta</Text>
+                  <Text variant="bodySmall" style={styles.summarySubtitle}>
+                    Soma das transações abaixo — não é o saldo da conta (que inclui o saldo
+                    inicial e aparece no Início)
                   </Text>
                   {accountTotals.map(({ accountId, accountName, totalCents }) => (
                     <View key={accountId} style={styles.summaryRow}>
@@ -154,7 +156,8 @@ const styles = StyleSheet.create({
     margin: spacing.md,
     marginBottom: spacing.sm,
   },
-  summaryTitle: {
+  summarySubtitle: {
+    color: colors.textSecondary,
     marginBottom: spacing.sm,
   },
   summaryRow: {

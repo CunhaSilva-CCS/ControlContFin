@@ -44,6 +44,7 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
   const [provider, setProvider] = useState('');
   const [existingNotificationId, setExistingNotificationId] = useState<string | null>(null);
   const [existingNextRunDate, setExistingNextRunDate] = useState<string | null>(null);
+  const [hasGeneratedBefore, setHasGeneratedBefore] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const { accounts } = useAccounts();
@@ -78,6 +79,7 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
         setProvider(existing.provider ?? '');
         setExistingNotificationId(existing.notificationId);
         setExistingNextRunDate(existing.nextRunDate);
+        setHasGeneratedBefore(existing.lastGeneratedDate !== null);
       })
       .catch(() => setLoadError('Não foi possível carregar esta recorrência.'));
   }, [isEditing, ruleId]);
@@ -91,11 +93,15 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
       return;
     }
 
-    // Editing must never rewind nextRunDate back to startDate — the rule may
-    // have already generated occurrences and advanced past it, and resetting
-    // it here would make the immediate runRecurringGeneration() call below
-    // replay (duplicate) every past occurrence up to today.
-    const nextRunDate = isEditing && existingNextRunDate ? existingNextRunDate : startDate;
+    // If the rule already generated at least one occurrence, its nextRunDate
+    // has advanced past startDate — editing must preserve that progress
+    // (not rewind it back to startDate), or the immediate
+    // runRecurringGeneration() call below would replay/duplicate every past
+    // occurrence up to today. But if it has NEVER fired yet, nextRunDate
+    // should still track startDate edits (e.g. pushing a not-yet-due rule
+    // out by a month), so only pin it once there's real progress to protect.
+    const nextRunDate =
+      isEditing && hasGeneratedBefore && existingNextRunDate ? existingNextRunDate : startDate;
 
     await cancelRecurringReminder(existingNotificationId);
     const notificationId = await scheduleRecurringReminder({
@@ -130,8 +136,15 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
 
     // If the first/next occurrence is already due today (or earlier), generate
     // its transaction right away instead of waiting for the app to be
-    // backgrounded/foregrounded again (the usual trigger for this job).
-    await runRecurringGeneration(todayISODate());
+    // backgrounded/foregrounded again (the usual trigger for this job). The
+    // rule itself is already saved at this point, so a failure here (e.g. a
+    // notification-scheduling error) must not strand the user on this screen
+    // — it'll simply be picked up on the next app foreground instead.
+    try {
+      await runRecurringGeneration(todayISODate());
+    } catch (err) {
+      console.error('Falha ao gerar transação imediatamente após salvar recorrência', err);
+    }
 
     navigation.goBack();
   }
