@@ -43,6 +43,7 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
   const [isSubscription, setIsSubscription] = useState(false);
   const [provider, setProvider] = useState('');
   const [existingNotificationId, setExistingNotificationId] = useState<string | null>(null);
+  const [existingNextRunDate, setExistingNextRunDate] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const { accounts } = useAccounts();
@@ -76,6 +77,7 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
         setIsSubscription(existing.isSubscription);
         setProvider(existing.provider ?? '');
         setExistingNotificationId(existing.notificationId);
+        setExistingNextRunDate(existing.nextRunDate);
       })
       .catch(() => setLoadError('Não foi possível carregar esta recorrência.'));
   }, [isEditing, ruleId]);
@@ -89,11 +91,17 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
       return;
     }
 
+    // Editing must never rewind nextRunDate back to startDate — the rule may
+    // have already generated occurrences and advanced past it, and resetting
+    // it here would make the immediate runRecurringGeneration() call below
+    // replay (duplicate) every past occurrence up to today.
+    const nextRunDate = isEditing && existingNextRunDate ? existingNextRunDate : startDate;
+
     await cancelRecurringReminder(existingNotificationId);
     const notificationId = await scheduleRecurringReminder({
       title: 'Lançamento recorrente',
       body: description || 'Você tem uma transação recorrente programada.',
-      nextRunDate: startDate,
+      nextRunDate,
       notifyBeforeDays: parsedNotifyBeforeDays,
     });
 
@@ -106,7 +114,7 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
       frequency,
       interval: parsedInterval,
       startDate,
-      nextRunDate: startDate,
+      nextRunDate,
       notifyBeforeDays: parsedNotifyBeforeDays,
       active,
       notificationId,
