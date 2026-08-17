@@ -1,7 +1,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useMemo } from 'react';
 import { FlatList, type ListRenderItemInfo, StyleSheet, View } from 'react-native';
-import { FAB, Text } from 'react-native-paper';
+import { Card, FAB, Text } from 'react-native-paper';
 
 import { PlaceholderScreen } from '@/components/common/PlaceholderScreen';
 import { TransactionRow, type TransactionRowData } from '@/components/transactions/TransactionRow';
@@ -11,6 +11,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { useLookup } from '@/hooks/useLookup';
 import { useTransactions } from '@/hooks/useTransactions';
 import type { TransactionsStackParamList } from '@/navigation/types';
+import { centsToBRL } from '@/utils/currency';
 
 type Props = NativeStackScreenProps<TransactionsStackParamList, 'TransactionsList'>;
 
@@ -44,6 +45,33 @@ export function TransactionsListScreen({ navigation }: Props) {
     [transactions, categoryById, accountById],
   );
 
+  const accountTotals = useMemo(() => {
+    const totalsByAccountId = new Map<number, number>();
+    const addToAccount = (accountId: number, deltaCents: number) =>
+      totalsByAccountId.set(accountId, (totalsByAccountId.get(accountId) ?? 0) + deltaCents);
+
+    for (const transaction of transactions) {
+      if (transaction.type === 'income') {
+        addToAccount(transaction.accountId, transaction.amountCents);
+      } else if (transaction.type === 'expense') {
+        addToAccount(transaction.accountId, -transaction.amountCents);
+      } else if (transaction.type === 'transfer') {
+        addToAccount(transaction.accountId, -transaction.amountCents);
+        if (transaction.transferAccountId !== null) {
+          addToAccount(transaction.transferAccountId, transaction.amountCents);
+        }
+      }
+    }
+
+    return accounts
+      .filter((account) => totalsByAccountId.has(account.id))
+      .map((account) => ({
+        accountId: account.id,
+        accountName: account.name,
+        totalCents: totalsByAccountId.get(account.id) ?? 0,
+      }));
+  }, [transactions, accounts]);
+
   const openTransaction = useCallback(
     (transactionId: number) => {
       navigation.navigate('TransactionDetail', { transactionId });
@@ -75,7 +103,33 @@ export function TransactionsListScreen({ navigation }: Props) {
           description="Toque no botão + para registrar sua primeira receita ou despesa."
         />
       ) : (
-        <FlatList data={rows} keyExtractor={(item) => String(item.id)} renderItem={renderItem} />
+        <FlatList
+          data={rows}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderItem}
+          ListHeaderComponent={
+            accountTotals.length > 0 ? (
+              <Card style={styles.summaryCard} mode="contained">
+                <Card.Content>
+                  <Text variant="titleSmall" style={styles.summaryTitle}>
+                    Total por conta
+                  </Text>
+                  {accountTotals.map(({ accountId, accountName, totalCents }) => (
+                    <View key={accountId} style={styles.summaryRow}>
+                      <Text variant="bodyMedium">{accountName}</Text>
+                      <Text
+                        variant="bodyMedium"
+                        style={{ color: totalCents < 0 ? colors.expense : colors.income }}
+                      >
+                        {centsToBRL(totalCents)}
+                      </Text>
+                    </View>
+                  ))}
+                </Card.Content>
+              </Card>
+            ) : null
+          }
+        />
       )}
       <FAB
         icon="plus"
@@ -95,6 +149,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: spacing.md,
     bottom: spacing.md,
+  },
+  summaryCard: {
+    margin: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  summaryTitle: {
+    marginBottom: spacing.sm,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.xs,
   },
   error: {
     color: colors.expense,

@@ -42,7 +42,7 @@ export const TransactionRow = memo(function TransactionRow({ transaction, onPres
     'Transação';
   const subtitleText = isTransfer
     ? `${transaction.accountName ?? '...'} → ${transaction.transferAccountName ?? '...'}`
-    : (transaction.categoryName ?? 'Sem categoria');
+    : `${transaction.categoryName ?? 'Sem categoria'} · ${transaction.accountName ?? '...'}`;
 
   const label = `${primaryText}, ${sign}${centsToBRL(transaction.amountCents)}, ${formatDatePtBR(transaction.date)}`;
 
