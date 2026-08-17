@@ -1,15 +1,7 @@
 import { Directory, File, Paths } from 'expo-file-system';
 
 import type { AppDatabase } from '@/db/types';
-import {
-  accounts,
-  budgets,
-  categories,
-  goalContributions,
-  goals,
-  recurringRules,
-  transactions,
-} from '@/db/schema';
+import { accounts, budgets, categories, recurringRules, transactions } from '@/db/schema';
 import { useDataStore } from '@/store/dataStore';
 
 import { filesToPrune, shouldCreateBackup } from './backupRetention';
@@ -27,29 +19,18 @@ export type BackupSnapshot = {
     transactions: (typeof transactions.$inferSelect)[];
     recurringRules: (typeof recurringRules.$inferSelect)[];
     budgets: (typeof budgets.$inferSelect)[];
-    goals: (typeof goals.$inferSelect)[];
-    goalContributions: (typeof goalContributions.$inferSelect)[];
   };
 };
 
 export async function buildBackupSnapshot(db: AppDatabase): Promise<BackupSnapshot> {
-  const [
-    accountsRows,
-    categoriesRows,
-    transactionsRows,
-    recurringRulesRows,
-    budgetsRows,
-    goalsRows,
-    goalContributionsRows,
-  ] = await Promise.all([
-    db.select().from(accounts),
-    db.select().from(categories),
-    db.select().from(transactions),
-    db.select().from(recurringRules),
-    db.select().from(budgets),
-    db.select().from(goals),
-    db.select().from(goalContributions),
-  ]);
+  const [accountsRows, categoriesRows, transactionsRows, recurringRulesRows, budgetsRows] =
+    await Promise.all([
+      db.select().from(accounts),
+      db.select().from(categories),
+      db.select().from(transactions),
+      db.select().from(recurringRules),
+      db.select().from(budgets),
+    ]);
 
   return {
     version: BACKUP_SNAPSHOT_VERSION,
@@ -60,21 +41,11 @@ export async function buildBackupSnapshot(db: AppDatabase): Promise<BackupSnapsh
       transactions: transactionsRows,
       recurringRules: recurringRulesRows,
       budgets: budgetsRows,
-      goals: goalsRows,
-      goalContributions: goalContributionsRows,
     },
   };
 }
 
-const BACKUP_DATA_KEYS = [
-  'accounts',
-  'categories',
-  'transactions',
-  'recurringRules',
-  'budgets',
-  'goals',
-  'goalContributions',
-] as const;
+const BACKUP_DATA_KEYS = ['accounts', 'categories', 'transactions', 'recurringRules', 'budgets'] as const;
 
 /**
  * Checked before anything is deleted, so a corrupted/truncated backup file
@@ -109,9 +80,7 @@ export async function restoreBackupSnapshot(db: AppDatabase, snapshot: BackupSna
   const { data } = snapshot;
 
   db.transaction((tx) => {
-    tx.delete(goalContributions).run();
     tx.delete(budgets).run();
-    tx.delete(goals).run();
     tx.delete(transactions).run();
     tx.delete(recurringRules).run();
     tx.delete(categories).run();
@@ -132,12 +101,6 @@ export async function restoreBackupSnapshot(db: AppDatabase, snapshot: BackupSna
     if (data.budgets.length > 0) {
       tx.insert(budgets).values(data.budgets).run();
     }
-    if (data.goals.length > 0) {
-      tx.insert(goals).values(data.goals).run();
-    }
-    if (data.goalContributions.length > 0) {
-      tx.insert(goalContributions).values(data.goalContributions).run();
-    }
   });
 
   const { bump } = useDataStore.getState();
@@ -145,7 +108,6 @@ export async function restoreBackupSnapshot(db: AppDatabase, snapshot: BackupSna
   bump('categories');
   bump('transactions');
   bump('budgets');
-  bump('goals');
   bump('recurringRules');
 }
 

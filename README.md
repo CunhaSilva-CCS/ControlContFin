@@ -6,7 +6,6 @@ App de controle financeiro pessoal completo para iOS e Android, feito com Expo (
 
 - Contas, categorias e transações (receitas, despesas e transferências)
 - Orçamentos mensais por categoria com alerta de estouro
-- Metas de economia com acompanhamento de progresso
 - Transações recorrentes (contas fixas/assinaturas) com lembretes automáticos
 - Relatórios com gráficos (gastos por categoria, receita x despesa por mês, evolução do saldo)
 - Exportação de dados em CSV/JSON
@@ -191,7 +190,7 @@ src/
 ├── components/   # Componentes reutilizáveis
 ├── db/           # Schema, migrations e repositórios (Drizzle + expo-sqlite)
 ├── store/        # Estado global (Zustand)
-├── services/     # Regras de negócio (recorrência, orçamentos, metas, relatórios, backup)
+├── services/     # Regras de negócio (recorrência, orçamentos, relatórios, backup)
 ├── hooks/        # Hooks de dados ligados ao banco local
 ├── constants/    # Tema, categorias padrão, presets
 └── utils/        # Funções utilitárias (moeda, datas)

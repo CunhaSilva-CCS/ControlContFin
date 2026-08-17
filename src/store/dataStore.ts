@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type DataTable = 'accounts' | 'categories' | 'transactions' | 'budgets' | 'goals' | 'recurringRules';
+export type DataTable = 'accounts' | 'categories' | 'transactions' | 'budgets' | 'recurringRules';
 
 type DataStoreState = {
   version: Record<DataTable, number>;
@@ -17,7 +17,6 @@ export const useDataStore = create<DataStoreState>((set) => ({
     categories: 0,
     transactions: 0,
     budgets: 0,
-    goals: 0,
     recurringRules: 0,
   },
   bump: (table) =>

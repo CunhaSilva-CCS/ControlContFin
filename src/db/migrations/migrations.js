@@ -6,6 +6,7 @@ import m0001 from './0001_lumpy_shotgun.sql';
 import m0002 from './0002_lovely_winter_soldier.sql';
 import m0003 from './0003_tan_manta.sql';
 import m0004 from './0004_uneven_chamber.sql';
+import m0005 from './0005_slim_zaladane.sql';
 
   export default {
     journal,
@@ -14,7 +15,8 @@ import m0004 from './0004_uneven_chamber.sql';
 m0001,
 m0002,
 m0003,
-m0004
+m0004,
+m0005
     }
   }
   

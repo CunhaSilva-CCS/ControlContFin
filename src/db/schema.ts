@@ -112,33 +112,3 @@ export const budgets = sqliteTable(
   },
   (table) => [uniqueIndex('budgets_category_month_idx').on(table.categoryId, table.month)],
 );
-
-export const goalStatusValues = ['active', 'completed', 'archived'] as const;
-export type GoalStatus = (typeof goalStatusValues)[number];
-
-export const goals = sqliteTable('goals', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  targetCents: integer('target_cents').notNull(),
-  currentCents: integer('current_cents').notNull().default(0),
-  deadline: text('deadline'),
-  color: text('color').notNull(),
-  icon: text('icon').notNull(),
-  linkedAccountId: integer('linked_account_id').references(() => accounts.id, { onDelete: 'set null' }),
-  status: text('status', { enum: goalStatusValues }).notNull().default('active'),
-  createdAt: text('created_at')
-    .notNull()
-    .default(sql`(current_timestamp)`),
-});
-
-export const goalContributions = sqliteTable('goal_contributions', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  goalId: integer('goal_id')
-    .notNull()
-    .references(() => goals.id, { onDelete: 'cascade' }),
-  amountCents: integer('amount_cents').notNull(),
-  date: text('date').notNull(),
-  linkedTransactionId: integer('linked_transaction_id').references(() => transactions.id, {
-    onDelete: 'set null',
-  }),
-});

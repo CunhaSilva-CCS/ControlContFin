@@ -1,7 +1,6 @@
 import { createAccount } from '@/db/repositories/accounts';
 import { upsertBudget } from '@/db/repositories/budgets';
 import { createCategory } from '@/db/repositories/categories';
-import { contributeToGoal, createGoal } from '@/db/repositories/goals';
 import { createRecurringRule } from '@/db/repositories/recurringRules';
 import { createTransaction } from '@/db/repositories/transactions';
 import { createTestDatabase } from '@/db/testClient';
@@ -43,15 +42,8 @@ async function seedSampleData(db: AppDatabase) {
     nextRunDate: '2026-09-01',
   });
   await upsertBudget(db, { categoryId: category.id, month: '2026-08', limitCents: 30000 });
-  const goal = await createGoal(db, {
-    name: 'Viagem',
-    targetCents: 200000,
-    color: '#1B5E4F',
-    icon: 'airplane',
-  });
-  await contributeToGoal(db, goal.id, 10000, '2026-08-05');
 
-  return { account, category, goal };
+  return { account, category };
 }
 
 describe('backup snapshot round-trip', () => {
@@ -66,8 +58,6 @@ describe('backup snapshot round-trip', () => {
     expect(snapshot.data.transactions).toHaveLength(1);
     expect(snapshot.data.recurringRules).toHaveLength(1);
     expect(snapshot.data.budgets).toHaveLength(1);
-    expect(snapshot.data.goals).toHaveLength(1);
-    expect(snapshot.data.goalContributions).toHaveLength(1);
   });
 
   it('restores a snapshot into an empty database, preserving IDs and relations', async () => {
@@ -128,7 +118,7 @@ describe('backup snapshot round-trip', () => {
 
     const corrupted = {
       ...snapshot,
-      data: { ...snapshot.data, goalContributions: undefined as never },
+      data: { ...snapshot.data, budgets: undefined as never },
     };
 
     await expect(restoreBackupSnapshot(db, corrupted)).rejects.toThrow();

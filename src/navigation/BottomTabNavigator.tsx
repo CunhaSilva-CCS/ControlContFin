@@ -42,7 +42,7 @@ export function BottomTabNavigator() {
       <Tab.Screen
         name="BudgetsGoals"
         component={BudgetsGoalsStack}
-        options={{ title: 'Orç. & Metas' }}
+        options={{ title: 'Orçamentos' }}
       />
       <Tab.Screen name="Reports" component={ReportsStack} options={{ title: 'Relatórios' }} />
       <Tab.Screen name="Settings" component={SettingsStack} options={{ title: 'Ajustes' }} />

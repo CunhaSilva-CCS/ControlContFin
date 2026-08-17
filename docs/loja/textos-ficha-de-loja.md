@@ -29,7 +29,6 @@ PRINCIPAIS RECURSOS
 • Contas e transações — registre receitas, despesas e transferências entre suas contas.
 • Categorias personalizáveis — organize seus gastos do seu jeito, com ícones e cores.
 • Orçamentos — defina limites mensais por categoria e acompanhe o quanto já gastou.
-• Metas de economia — crie metas e registre contribuições até alcançá-las.
 • Transações recorrentes — lançamentos automáticos para contas fixas, com lembretes.
 • Relatórios visuais — gráficos de receitas, despesas e evolução do saldo ao longo do tempo.
 • Múltiplas contas — corrente, poupança, carteira, cartão de crédito e mais.
@@ -96,7 +95,6 @@ PRINCIPAIS RECURSOS
 • Contas e transações, incluindo transferências entre contas
 • Categorias personalizáveis com ícones e cores
 • Orçamentos mensais por categoria, com acompanhamento visual
-• Metas de economia com contribuições registradas
 • Transações recorrentes com lembretes automáticos
 • Relatórios e gráficos de receitas, despesas e evolução do saldo
 • Suporte a múltiplas contas (corrente, poupança, carteira, cartão de crédito)
@@ -116,9 +114,9 @@ Para quem quer organizar a vida financeira sem abrir mão de privacidade.
 ### Palavras-chave (máx. 100 caracteres, separadas por vírgula, sem espaços após a vírgula)
 
 ```
-finanças,orçamento,gastos,economia,dinheiro,controle financeiro,metas,privacidade,offline
+finanças,orçamento,gastos,economia,dinheiro,controle financeiro,privacidade,offline
 ```
-*(90 caracteres)*
+*(83 caracteres)*
 
 ### Seção de privacidade (App Privacy / "Nutrition Label") da App Store Connect
 
