@@ -21,6 +21,7 @@ import { useAccounts } from '@/hooks/useAccounts';
 import { useCategories } from '@/hooks/useCategories';
 import type { SettingsStackParamList } from '@/navigation/types';
 import { cancelRecurringReminder, scheduleRecurringReminder } from '@/services/notifications';
+import { runRecurringGeneration } from '@/services/runRecurringGeneration';
 import { todayISODate } from '@/utils/date';
 
 type Props = NativeStackScreenProps<SettingsStackParamList, 'RecurringRuleForm'>;
@@ -118,6 +119,12 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
     } else {
       await createRecurringRule(db, input);
     }
+
+    // If the first/next occurrence is already due today (or earlier), generate
+    // its transaction right away instead of waiting for the app to be
+    // backgrounded/foregrounded again (the usual trigger for this job).
+    await runRecurringGeneration(todayISODate());
+
     navigation.goBack();
   }
 
