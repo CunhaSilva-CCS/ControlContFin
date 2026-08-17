@@ -7,11 +7,11 @@ import { useAsyncQuery } from './useAsyncQuery';
 
 export type RecurringRule = typeof recurringRules.$inferSelect;
 
-export function useRecurringRules() {
+export function useRecurringRules({ onlySubscriptions = false } = {}) {
   const version = useDataStore((state) => state.version.recurringRules);
   const { data, loading, error } = useAsyncQuery<RecurringRule[]>(
-    () => listRecurringRules(db, { includeInactive: true }),
-    [version],
+    () => listRecurringRules(db, { includeInactive: true, onlySubscriptions }),
+    [version, onlySubscriptions],
     [],
   );
 

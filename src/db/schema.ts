@@ -57,6 +57,8 @@ export const recurringRules = sqliteTable('recurring_rules', {
   notifyBeforeDays: integer('notify_before_days').notNull().default(0),
   notificationId: text('notification_id'),
   active: integer('active', { mode: 'boolean' }).notNull().default(true),
+  isSubscription: integer('is_subscription', { mode: 'boolean' }).notNull().default(false),
+  provider: text('provider'),
   createdAt: text('created_at')
     .notNull()
     .default(sql`(current_timestamp)`),

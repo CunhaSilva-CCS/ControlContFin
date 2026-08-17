@@ -1,7 +1,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { Button, SegmentedButtons, Text, TextInput } from 'react-native-paper';
+import { Button, List, SegmentedButtons, Switch, Text, TextInput } from 'react-native-paper';
 
 import { AccountPicker } from '@/components/transactions/AccountPicker';
 import { AmountInput } from '@/components/common/AmountInput';
@@ -39,6 +39,8 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
   const [startDate, setStartDate] = useState(todayISODate());
   const [notifyBeforeDays, setNotifyBeforeDays] = useState('1');
   const [active, setActive] = useState(true);
+  const [isSubscription, setIsSubscription] = useState(false);
+  const [provider, setProvider] = useState('');
   const [existingNotificationId, setExistingNotificationId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -70,6 +72,8 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
         setStartDate(existing.startDate);
         setNotifyBeforeDays(String(existing.notifyBeforeDays));
         setActive(existing.active);
+        setIsSubscription(existing.isSubscription);
+        setProvider(existing.provider ?? '');
         setExistingNotificationId(existing.notificationId);
       })
       .catch(() => setLoadError('Não foi possível carregar esta recorrência.'));
@@ -105,6 +109,8 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
       notifyBeforeDays: parsedNotifyBeforeDays,
       active,
       notificationId,
+      isSubscription,
+      provider: isSubscription ? provider || null : null,
     };
 
     if (isEditing && ruleId) {
@@ -156,6 +162,24 @@ export function RecurringRuleFormScreen({ route, navigation }: Props) {
 
       <AccountPicker accounts={accounts} selectedId={accountId} onSelect={setAccountId} />
       <CategoryPicker categories={categories} selectedId={categoryId} onSelect={setCategoryId} />
+
+      <List.Item
+        title="É uma assinatura?"
+        description="Marque para acompanhar como assinatura (ex: streaming, apps, academia)"
+        style={styles.listItem}
+        left={(props) => <List.Icon {...props} icon="sync" />}
+        right={() => <Switch value={isSubscription} onValueChange={setIsSubscription} />}
+      />
+
+      {isSubscription && (
+        <TextInput
+          label="Fornecedor (opcional)"
+          mode="outlined"
+          placeholder="Ex: Netflix, Spotify, Academia"
+          value={provider}
+          onChangeText={setProvider}
+        />
+      )}
 
       <SegmentedButtons
         value={frequency}
@@ -215,5 +239,8 @@ const styles = StyleSheet.create({
   },
   error: {
     color: colors.expense,
+  },
+  listItem: {
+    paddingHorizontal: 0,
   },
 });

@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import type { AppDatabase } from '@/db/types';
 import { useDataStore } from '@/store/dataStore';
@@ -18,6 +18,8 @@ export type NewRecurringRuleInput = {
   endDate?: string | null;
   nextRunDate: string;
   notifyBeforeDays?: number;
+  isSubscription?: boolean;
+  provider?: string | null;
 };
 
 export async function createRecurringRule(db: AppDatabase, input: NewRecurringRuleInput) {
@@ -49,15 +51,24 @@ export async function deleteRecurringRule(db: AppDatabase, id: number) {
   useDataStore.getState().bump('recurringRules');
 }
 
-export async function listRecurringRules(db: AppDatabase, { includeInactive = false } = {}) {
-  if (includeInactive) {
-    return db.select().from(recurringRules).orderBy(recurringRules.nextRunDate);
+export async function listRecurringRules(
+  db: AppDatabase,
+  { includeInactive = false, onlySubscriptions = false } = {},
+) {
+  const conditions = [];
+  if (!includeInactive) {
+    conditions.push(eq(recurringRules.active, true));
   }
-  return db
-    .select()
-    .from(recurringRules)
-    .where(eq(recurringRules.active, true))
-    .orderBy(recurringRules.nextRunDate);
+  if (onlySubscriptions) {
+    conditions.push(eq(recurringRules.isSubscription, true));
+  }
+
+  const query = db.select().from(recurringRules).orderBy(recurringRules.nextRunDate);
+
+  if (conditions.length === 0) {
+    return query;
+  }
+  return query.where(and(...conditions));
 }
 
 export async function getRecurringRule(db: AppDatabase, id: number) {
